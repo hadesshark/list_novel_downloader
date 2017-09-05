@@ -61,8 +61,8 @@ class Downloader(object):
 
             self.show_now_url()
 
-            for index in range(len(self.get_post_num())):
-                chapter_num = int(self.get_post_num()[index])
+            for index, element in enumerate(self.get_post_num()):
+                chapter_num = int(element)
                 one_content = self.page_content_list()[index].xpath(u".//text()")
                 self.temp_list.insert(
                     chapter_num - 1, {"id": chapter_num, "content": one_content})
@@ -81,8 +81,8 @@ class Downloader(object):
     def json_to_txt(self, book_json):
         content = ""
         with open(title + '.txt', mode="w", encoding="utf-8") as txt_file:
-            for item in range(len(book_json)):
-                content += ''.join(book_json[item]["content"])
+            for item in book_json:
+                content += ''.join(item["content"])
             txt_file.write(content)
 
 # downloader = Downloader(url)
@@ -90,6 +90,6 @@ class Downloader(object):
 
 
 downloader = Downloader(url)
-# downloader.insert_list()
-# downloader.save_book_json()
+downloader.insert_list()
+downloader.save_book_json()
 downloader.json_to_txt(downloader.get_book_json())
