@@ -19,8 +19,9 @@ class NovelForm(FlaskForm):
     name = StringField('Title: ')
     author = StringField('author: ')
     url = StringField('URL: ')
-    finish = RadioField('Label', choices=[('yes','已完結'),('no','連載中')])
+    finish = RadioField('Label', choices=[('yes', '已完結'), ('no', '連載中')])
     submit = SubmitField('download')
+
 
 def novel_download(jsonfile):
     novel = Novel(jsonfile)
@@ -35,7 +36,7 @@ class SettingForm(FlaskForm):
     name = StringField('Title: ', validators=[Required()])
     author = StringField('Author: ', validators=[])
     url = StringField('URL: ', validators=[Required()])
-    finish = RadioField('Label', choices=[('yes','已完結'),('no','連載中')])
+    finish = RadioField('Label', choices=[('yes', '已完結'), ('no', '連載中')])
     submit = SubmitField('Save')
 
 
@@ -106,10 +107,11 @@ def setting():
 
     return render_template('setting.html', data=data)
 
+
 @app.route('/list_downloader', methods=['POST,', 'GET'])
 def list_downloader():
 
-    return  render_template('list_downloader.html', data=data)
+    return render_template('list_downloader.html', data=data)
 
 
 if __name__ == '__main__':
