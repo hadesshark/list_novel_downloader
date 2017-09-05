@@ -5,9 +5,9 @@ from lxml import etree, html
 
 import json
 
-title = "\u8d70\u9032\u4fee\u4ed9"
-url = "https://ck101.com/thread-3394780-1-1.html"
-author = "\u543e\u9053\u9577\u4e0d\u5b64"
+title = "大明妖孽"
+url = "https://ck101.com/thread-3945463-1-1.html"
+author = "冰臨神下"
 finish = False
 
 
@@ -24,14 +24,6 @@ class Downloader(object):
         self.url = url
         self.content = ''
         self.temp_list = []
-
-    def all_chapter(self):
-        while self.have_url():
-            self.chpater_list_convert_string()
-
-            self.set_url(self.get_next_url())
-
-        return self.content
 
     def have_url(self):
         return True if self.url else False
@@ -55,11 +47,11 @@ class Downloader(object):
     def get_next_url(self):
         try:
             return self.down_ans(self.__xpath_next_url)[0]
-        except EOFError:
+        except IndexError:
             return None
 
     def page_content_list(self):
-        return self.down_ans(u"//div[@class='plhin']//td[@class='t_f']")
+        return self.down_ans(u".//td[@class='t_f']")
 
     def get_post_num(self):
         return self.down_ans(self.__xpath_post_num)
@@ -71,7 +63,7 @@ class Downloader(object):
 
             for index in range(len(self.get_post_num())):
                 chapter_num = int(self.get_post_num()[index])
-                one_content = self.page_content_list()[index].text_content()
+                one_content = self.page_content_list()[index].xpath(u".//text()")
                 self.temp_list.insert(
                     chapter_num - 1, {"id": chapter_num, "content": one_content})
 
@@ -90,8 +82,14 @@ class Downloader(object):
         content = ""
         with open(title + '.txt', mode="w", encoding="utf-8") as txt_file:
             for item in range(len(book_json)):
-                content += book_json[item]["content"]
+                content += ''.join(book_json[item]["content"])
             txt_file.write(content)
 
+# downloader = Downloader(url)
+# print(downloader.toString().xpath(u".//td[@class='t_f']")[0].xpath(u".//text()"))
+
+
 downloader = Downloader(url)
-print(downloader.toString().xpath(u".//td[@class='t_f']")[0].xpath(u".//text()"))
+# downloader.insert_list()
+# downloader.save_book_json()
+downloader.json_to_txt(downloader.get_book_json())
