@@ -57,9 +57,10 @@ class Downloader(object):
         return self.down_ans(self.__xpath_post_num)
 
     def generator_item(self):
+        content_list = self.page_content_list()
         for index, element in enumerate(self.get_post_num()):
             chapter_num = int(element)
-            one_content = self.page_content_list()[index].xpath(u".//text()")
+            one_content = content_list[index].xpath(u".//text()")
             yield {"id": chapter_num, "content": one_content}
 
     def insert_list(self):
