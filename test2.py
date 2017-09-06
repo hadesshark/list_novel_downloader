@@ -6,9 +6,9 @@ import time
 
 import json
 
-title = "\u8d70\u9032\u4fee\u4ed9"
-url = "https://ck101.com/thread-3394780-1-1.html"
-author = "\u543e\u9053\u9577\u4e0d\u5b64"
+title = "大明妖孽"
+url = "https://ck101.com/thread-3945463-1-1.html"
+author = "冰臨神下"
 finish = False
 
 
@@ -56,7 +56,7 @@ class Downloader(object):
     def get_next_url(self):
         try:
             return self.down_ans(self.__xpath_next_url)[0]
-        except EOFError:
+        except IndexError:
             return None
 
     def page_content_list(self):
@@ -82,7 +82,10 @@ class Downloader(object):
                 self.temp_list.append(item)
 
             tEnd = time.time()
-            print("It cost {} sec".format(tEnd - tStart))
+            tFinish = tEnd - tStart
+            print("It cost {} sec".format(tFinish))
+            if (tFinish < 2):
+                time.sleep(2 - tFinish)
 
             self.set_url(self.get_next_url())
 
@@ -98,8 +101,8 @@ class Downloader(object):
     def json_to_txt(self, book_json):
         content = ""
         with open(title + '.txt', mode="w", encoding="utf-8") as txt_file:
-            for item in range(len(book_json)):
-                content += book_json[item]["content"]
+            for item in book_json:
+                content += ''.join(item["content"])
             txt_file.write(content)
 
 
