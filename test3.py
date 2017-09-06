@@ -56,16 +56,25 @@ class Downloader(object):
     def get_post_num(self):
         return self.down_ans(self.__xpath_post_num)
 
+    def generator_item(self):
+        for index, element in enumerate(self.get_post_num()):
+            chapter_num = int(element)
+            one_content = self.page_content_list()[index].xpath(u".//text()")
+            yield {"id": chapter_num, "content": one_content}
+
     def insert_list(self):
         while self.have_url():
 
             self.show_now_url()
 
-            for index, element in enumerate(self.get_post_num()):
-                chapter_num = int(element)
-                one_content = self.page_content_list()[index].xpath(u".//text()")
-                self.temp_list.insert(
-                    chapter_num - 1, {"id": chapter_num, "content": one_content})
+            # for index, element in enumerate(self.get_post_num()):
+            #     chapter_num = int(element)
+            #     one_content = self.page_content_list()[index].xpath(u".//text()")
+            #     self.temp_list.insert(
+            #         chapter_num - 1, {"id": chapter_num, "content": one_content})
+
+            for item in (self.generator_item()):
+                self.temp_list.append(item)
 
             self.set_url(self.get_next_url())
 
