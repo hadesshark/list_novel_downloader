@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
 import requests
 import sys
-from lxml import etree, html
+from lxml import html
 import time
 import os
 
 import json
-
-# title = "大明妖孽"
-# url = "https://ck101.com/thread-3945463-1-1.html"
-# author = "冰臨神下"
-# finish = False
 
 with open("Book.json", encoding="utf-8") as json_file:
     book = json.load(json_file)
@@ -45,14 +40,6 @@ class Downloader(object):
         self.url = url
         self.content = ''
         self.temp_list = []
-
-    def all_chapter(self):
-        while self.have_url():
-            self.chpater_list_convert_string()
-
-            self.set_url(self.get_next_url())
-
-        return self.content
 
     def have_url(self):
         return True if self.url else False
@@ -104,8 +91,8 @@ class Downloader(object):
             tEnd = time.time()
             tFinish = tEnd - tStart
             sys.stdout.write("\nIt cost {} sec\n".format(tFinish))
-            if (tFinish < 2):
-                time.sleep(2 - tFinish)
+            if (tFinish < 3):
+                time.sleep(3 - tFinish)
 
             self.set_url(self.get_next_url())
 
@@ -118,20 +105,34 @@ class Downloader(object):
             book_json = json.load(json_file)
         return book_json
 
-    def json_to_txt(self, book_json):
-        content = ""
+
+class JsonToTxt(object):
+    
+    DIR_TXT_FOLDER = os.path.join("bookstore_txt", title + '.txt')
+    content = ''
+    
+    def __init__(self, jsonfile):
+        self.book_json = jsonfile
+    
+    def convert(self):
         with open(self.DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
-            for item in book_json:
-                content += ''.join(item["content"])
-            txt_file.write(content)
+            for item in self.book_json:
+                self.content += ''.join(item["content"])
+            txt_file.write(self.content)
+
+
+def book_setting():
+    downloader = Downloader(url)
+    downloader.insert_list()
+    downloader.save_book_json()
+    JsonToTxt(downloader.get_book_json()).convert()
 
 
 def main():
     if not title in book_list_item():
-        downloader = Downloader(url)
-        downloader.insert_list()
-        downloader.save_book_json()
-        downloader.json_to_txt(downloader.get_book_json())
+        
+        book_setting()
+        
         item = {'title': title, 'author': author, 'url': url, 'finish': finish}
         bookstore.append(item)
         with open("Bookstore.json", mode="w", encoding="utf-8") as json_file:
