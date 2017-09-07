@@ -33,7 +33,6 @@ class Downloader(object):
         'User-Agent':
         'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
     }
-    
 
     def __init__(self, url=""):
         self.url = url
@@ -45,7 +44,7 @@ class Downloader(object):
 
     def set_url(self, url):
         self.url = url
-    
+
     def get_temp_list(self):
         return self.temp_list
 
@@ -100,17 +99,17 @@ class Downloader(object):
 
 
 class Book(object):
-    
+
     DIR_JSON_FOLDER = os.path.join("bookstore_json", title + '.json')
     DIR_TXT_FOLDER = os.path.join("bookstore_txt", title + '.txt')
-    
+
     def __init__(self, content_obj):
         self.content_obj = content_obj
-    
+
     def save_json(self):
         with open(self.DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
             json.dump(self.content_obj, f, indent=2)
-        
+
     def save_txt(self):
         contents = ''
         with open(self.DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
@@ -119,25 +118,10 @@ class Book(object):
             txt_file.write(contents)
 
 
-class JsonToTxt(object):
-    
-    DIR_TXT_FOLDER = os.path.join("bookstore_txt", title + '.txt')
-    content = ''
-    
-    def __init__(self, jsonfile):
-        self.book_json = jsonfile
-    
-    def convert(self):
-        with open(self.DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
-            for item in self.book_json:
-                self.content += ''.join(item["content"])
-            txt_file.write(self.content)
-
-
 def book_setting():
     downloader = Downloader(url)
     downloader.insert_list()
-    
+
     book = Book(downloader.get_temp_list())
     book.save_json()
     book.save_txt()
@@ -145,9 +129,9 @@ def book_setting():
 
 def main():
     if not title in book_list_item():
-        
+
         book_setting()
-        
+
         item = {'title': title, 'author': author, 'url': url, 'finish': finish}
         bookstore.append(item)
         with open("Bookstore.json", mode="w", encoding="utf-8") as json_file:
@@ -156,7 +140,5 @@ def main():
         print(title + '已經有下載過了')
 
 
-
 if __name__ == '__main__':
     main()
-
