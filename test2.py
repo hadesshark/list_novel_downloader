@@ -27,55 +27,23 @@ def book_list_item():
 
 class Downloader(object):
     __xpath_post_num = u"//div[@class='plhin']//a//em//text()"
-    __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
     __xpath_all_num = u"//div[@class='pg']/a[@class='last']//text()"
-    __headers = {
-        'User-Agent':
-        'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
-    }
+    __xpath_content_list = u"//td[@class='t_f']"
 
     def __init__(self, url=""):
         self.obj_url = URL(url)
-        self.url = self.obj_url.get_url()
+        self.html_string = HtmlString(url)
         self.content = ''
         self.temp_list = self.insert_list()
-
-    def have_url(self):
-        return True if self.url else False
-
-    def set_url(self, url):
-        self.url = url
-
-    def get_url(self):
-        return self.url
 
     def get_contents(self):
         return self.temp_list
 
-    def toString(self):
-        response = requests.get(self.url, headers=self.__headers)
-        if response.status_code == 200:
-            return html.fromstring(response.text.encode('utf-8'))
-        else:
-            return None
-
-    def down_ans(self, path):
-        return self.toString().xpath(path)
-
-    def show_now_url(self):
-        sys.stdout.write("\rurl: {0}".format(self.url))
-
-    def get_next_url(self):
-        try:
-            return self.down_ans(self.__xpath_next_url)[0]
-        except IndexError:
-            return None
-
     def page_content_list(self):
-        return self.down_ans(u"//td[@class='t_f']")
+        return self.html_string.analysis(self.__xpath_content_list)
 
     def get_post_num(self):
-        return self.down_ans(self.__xpath_post_num)
+        return self.html_string.analysis(self.__xpath_post_num)
 
     def generator_item(self):
         content_list = self.page_content_list()
@@ -90,31 +58,40 @@ class Downloader(object):
 
             self.obj_url.show_now_url()
 
-            tStart = time.time()
-
             for item in (self.generator_item()):
                 temp_list.append(item)
-
-            tEnd = time.time()
-            tFinish = tEnd - tStart
-            sys.stdout.write("\nIt cost {} sec\n".format(tFinish))
-            if (tFinish < 3):
-                time.sleep(3 - tFinish)
 
             self.obj_url.set_url(self.obj_url.get_next_url())
         return temp_list
 
 
+class HtmlString(object):
 
+    __headers = {
+        'User-Agent':
+        'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
+    }
+
+    def __init__(self, url):
+        self.html_string = self.url_toString(url)
+
+    def url_toString(self, url):
+        response = requests.get(url, headers=self.__headers)
+        if response.status_code == 200:
+            return html.fromstring(response.text.encode('utf-8'))
+        else:
+            return None
+
+    def analysis(self, path):
+        return self.html_string.xpath(path)
+
+    def get_html_string(self):
+        return self.html_string
 
 
 class URL(object):
 
     __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
-    __headers = {
-        'User-Agent':
-        'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
-    }
 
     def __init__(self, url):
         self.url = url
@@ -128,19 +105,9 @@ class URL(object):
     def get_url(self):
         return self.url
 
-    def url_toString(self):
-        response = requests.get(self.get_url(), headers=self.__headers)
-        if response.status_code == 200:
-            return html.fromstring(response.text.encode('utf-8'))
-        else:
-            return None
-
-    def url_down_ans(self, path):
-        return self.url_toString().xpath(path)
-
     def get_next_url(self):
         try:
-            return self.url_down_ans(self.__xpath_next_url)[0]
+            return HtmlString(self.get_url()).analysis(self.__xpath_next_url)[0]
         except IndexError:
             return None
 
