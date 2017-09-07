@@ -37,7 +37,7 @@ class Downloader(object):
     def __init__(self, url=""):
         self.url = url
         self.content = ''
-        self.temp_list = []
+        self.temp_list = self.insert_list()
 
     def have_url(self):
         return True if self.url else False
@@ -45,7 +45,10 @@ class Downloader(object):
     def set_url(self, url):
         self.url = url
 
-    def get_temp_list(self):
+    def get_url(self):
+        return self.url
+
+    def get_contents(self):
         return self.temp_list
 
     def toString(self):
@@ -81,13 +84,15 @@ class Downloader(object):
             yield {"id": chapter_num, "content": one_content}
 
     def insert_list(self):
+        temp_list = []
         while self.have_url():
 
             self.show_now_url()
+
             tStart = time.time()
 
             for item in (self.generator_item()):
-                self.temp_list.append(item)
+                temp_list.append(item)
 
             tEnd = time.time()
             tFinish = tEnd - tStart
@@ -96,6 +101,38 @@ class Downloader(object):
                 time.sleep(3 - tFinish)
 
             self.set_url(self.get_next_url())
+        return temp_list
+
+class URL(object):
+
+    __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
+
+    def __init__(self, url):
+        self.url = url
+
+    def have_url(self):
+        return True if self.url else False
+
+    def set_url(self, url):
+        self.url = url
+
+    def get_url(self):
+        return self.url
+
+    def get_next_url(self):
+        return Downloader(self.url).down_ans(self.__xpath_next_url)
+
+    def show_now_url(self):
+        sys.stdout.write("\rurl: {0}".format(self.url))
+
+
+class Contents(object):
+
+    def __init__(self):
+        self.contents = Downloader(url).get_contents()
+
+    def get_contents(self):
+        return self.contents
 
 
 class Book(object):
@@ -103,8 +140,8 @@ class Book(object):
     DIR_JSON_FOLDER = os.path.join("bookstore_json", title + '.json')
     DIR_TXT_FOLDER = os.path.join("bookstore_txt", title + '.txt')
 
-    def __init__(self, content_obj):
-        self.content_obj = content_obj
+    def __init__(self):
+        self.content_obj = Contents().get_contents()
 
     def save_json(self):
         with open(self.DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
@@ -119,10 +156,7 @@ class Book(object):
 
 
 def book_setting():
-    downloader = Downloader(url)
-    downloader.insert_list()
-
-    book = Book(downloader.get_temp_list())
+    book = Book()
     book.save_json()
     book.save_txt()
 
