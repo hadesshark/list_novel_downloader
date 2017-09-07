@@ -35,7 +35,8 @@ class Downloader(object):
     }
 
     def __init__(self, url=""):
-        self.url = url
+        self.obj_url = URL(url)
+        self.url = self.obj_url.get_url()
         self.content = ''
         self.temp_list = self.insert_list()
 
@@ -85,9 +86,9 @@ class Downloader(object):
 
     def insert_list(self):
         temp_list = []
-        while self.have_url():
+        while self.obj_url.have_url():
 
-            self.show_now_url()
+            self.obj_url.show_now_url()
 
             tStart = time.time()
 
@@ -100,12 +101,20 @@ class Downloader(object):
             if (tFinish < 3):
                 time.sleep(3 - tFinish)
 
-            self.set_url(self.get_next_url())
+            self.obj_url.set_url(self.obj_url.get_next_url())
         return temp_list
+
+
+
+
 
 class URL(object):
 
     __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
+    __headers = {
+        'User-Agent':
+        'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
+    }
 
     def __init__(self, url):
         self.url = url
@@ -119,8 +128,21 @@ class URL(object):
     def get_url(self):
         return self.url
 
+    def url_toString(self):
+        response = requests.get(self.get_url(), headers=self.__headers)
+        if response.status_code == 200:
+            return html.fromstring(response.text.encode('utf-8'))
+        else:
+            return None
+
+    def url_down_ans(self, path):
+        return self.url_toString().xpath(path)
+
     def get_next_url(self):
-        return Downloader(self.url).down_ans(self.__xpath_next_url)
+        try:
+            return self.url_down_ans(self.__xpath_next_url)[0]
+        except IndexError:
+            return None
 
     def show_now_url(self):
         sys.stdout.write("\rurl: {0}".format(self.url))
