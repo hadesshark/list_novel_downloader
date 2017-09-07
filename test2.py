@@ -33,8 +33,7 @@ class Downloader(object):
         'User-Agent':
         'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
     }
-    DIR_JSON_FOLDER = os.path.join("bookstore_json", title + '.json')
-    DIR_TXT_FOLDER = os.path.join("bookstore_txt", title + '.txt')
+    
 
     def __init__(self, url=""):
         self.url = url
@@ -46,6 +45,9 @@ class Downloader(object):
 
     def set_url(self, url):
         self.url = url
+    
+    def get_temp_list(self):
+        return self.temp_list
 
     def toString(self):
         response = requests.get(self.url, headers=self.__headers)
@@ -96,14 +98,25 @@ class Downloader(object):
 
             self.set_url(self.get_next_url())
 
-    def save_book_json(self):
-        with open(self.DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
-            json.dump(self.temp_list, f, indent=2)
 
-    def get_book_json(self):
-        with open(self.DIR_JSON_FOLDER, encoding="utf-8") as json_file:
-            book_json = json.load(json_file)
-        return book_json
+class Book(object):
+    
+    DIR_JSON_FOLDER = os.path.join("bookstore_json", title + '.json')
+    DIR_TXT_FOLDER = os.path.join("bookstore_txt", title + '.txt')
+    
+    def __init__(self, content_obj):
+        self.content_obj = content_obj
+    
+    def save_json(self):
+        with open(self.DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
+            json.dump(self.content_obj, f, indent=2)
+        
+    def save_txt(self):
+        contents = ''
+        with open(self.DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
+            for item in self.content_obj:
+                contents += ''.join(item["content"])
+            txt_file.write(contents)
 
 
 class JsonToTxt(object):
@@ -124,8 +137,10 @@ class JsonToTxt(object):
 def book_setting():
     downloader = Downloader(url)
     downloader.insert_list()
-    downloader.save_book_json()
-    JsonToTxt(downloader.get_book_json()).convert()
+    
+    book = Book(downloader.get_temp_list())
+    book.save_json()
+    book.save_txt()
 
 
 def main():
