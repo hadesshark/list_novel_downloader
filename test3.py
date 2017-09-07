@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import requests
 import sys
-from lxml import etree, html
+from lxml import etree
+import os
 
 import json
 
@@ -19,6 +20,8 @@ class Downloader(object):
         'User-Agent':
         'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
     }
+    DIR_JSON_FOLDER = os.path.join("bookstore_json", title + '.json')
+    DIR_TXT_FOLDER = os.path.join("bookstore_txt", title + '.txt')
 
     def __init__(self, url=""):
         self.url = url
@@ -68,36 +71,27 @@ class Downloader(object):
 
             self.show_now_url()
 
-            # for index, element in enumerate(self.get_post_num()):
-            #     chapter_num = int(element)
-            #     one_content = self.page_content_list()[index].xpath(u".//text()")
-            #     self.temp_list.insert(
-            #         chapter_num - 1, {"id": chapter_num, "content": one_content})
-
             for item in (self.generator_item()):
                 self.temp_list.append(item)
 
             self.set_url(self.get_next_url())
 
     def save_book_json(self):
-        with open(title + '.json', mode="w", encoding="utf-8") as f:
+        with open(self.DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
             json.dump(self.temp_list, f, indent=2)
 
     def get_book_json(self):
-        with open(title + '.json', encoding="utf-8") as json_file:
+        with open(self.DIR_JSON_FOLDER, encoding="utf-8") as json_file:
             book_json = json.load(json_file)
         return book_json
 
     def json_to_txt(self, book_json):
         content = ""
-        with open(title + '.txt', mode="w", encoding="utf-8") as txt_file:
+        with open(self.DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
             for item in book_json:
                 content += ''.join(item["content"])
             txt_file.write(content)
-
-# downloader = Downloader(url)
-# print(downloader.toString().xpath(u".//td[@class='t_f']")[0].xpath(u".//text()"))
-
+            
 
 downloader = Downloader(url)
 downloader.insert_list()

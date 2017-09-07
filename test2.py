@@ -3,13 +3,31 @@ import requests
 import sys
 from lxml import etree, html
 import time
+import os
 
 import json
 
-title = "大明妖孽"
-url = "https://ck101.com/thread-3945463-1-1.html"
-author = "冰臨神下"
-finish = False
+# title = "大明妖孽"
+# url = "https://ck101.com/thread-3945463-1-1.html"
+# author = "冰臨神下"
+# finish = False
+
+with open("Book.json", encoding="utf-8") as json_file:
+    book = json.load(json_file)
+
+title = book.get('title')
+url = book.get('url')
+author = book.get('author')
+finish = book.get('finish')
+
+
+with open("Bookstore.json", encoding="utf-8") as json_file:
+    bookstore = json.load(json_file)
+
+
+def book_list_item():
+    for item in bookstore:
+        yield item.get('title')
 
 
 class Downloader(object):
@@ -20,6 +38,8 @@ class Downloader(object):
         'User-Agent':
         'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
     }
+    DIR_JSON_FOLDER = os.path.join("bookstore_json", title + '.json')
+    DIR_TXT_FOLDER = os.path.join("bookstore_txt", title + '.txt')
 
     def __init__(self, url=""):
         self.url = url
@@ -83,30 +103,44 @@ class Downloader(object):
 
             tEnd = time.time()
             tFinish = tEnd - tStart
-            print("It cost {} sec".format(tFinish))
+            sys.stdout.write("\nIt cost {} sec\n".format(tFinish))
             if (tFinish < 2):
                 time.sleep(2 - tFinish)
 
             self.set_url(self.get_next_url())
 
     def save_book_json(self):
-        with open(title + '.json', mode="w", encoding="utf-8") as f:
+        with open(self.DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
             json.dump(self.temp_list, f, indent=2)
 
     def get_book_json(self):
-        with open(title + '.json', encoding="utf-8") as json_file:
+        with open(self.DIR_JSON_FOLDER, encoding="utf-8") as json_file:
             book_json = json.load(json_file)
         return book_json
 
     def json_to_txt(self, book_json):
         content = ""
-        with open(title + '.txt', mode="w", encoding="utf-8") as txt_file:
+        with open(self.DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
             for item in book_json:
                 content += ''.join(item["content"])
             txt_file.write(content)
 
 
-downloader = Downloader(url)
-downloader.insert_list()
-downloader.save_book_json()
-downloader.json_to_txt(downloader.get_book_json())
+def main():
+    if not title in book_list_item():
+        downloader = Downloader(url)
+        downloader.insert_list()
+        downloader.save_book_json()
+        downloader.json_to_txt(downloader.get_book_json())
+        item = {'title': title, 'author': author, 'url': url, 'finish': finish}
+        bookstore.append(item)
+        with open("Bookstore.json", mode="w", encoding="utf-8") as json_file:
+            json.dump(bookstore, json_file, indent=2)
+    else:
+        print(title + '已經有下載過了')
+
+
+
+if __name__ == '__main__':
+    main()
+

@@ -1,10 +1,14 @@
-{
-  "novel": [
-    {
-      "finish": false,
-      "url": "https://ck101.com/thread-3394780-1-1.html",
-      "title": "\u8d70\u9032\u4fee\u4ed9",
-      "author": "\u543e\u9053\u9577\u4e0d\u5b64"
-    }
-  ]
-}
+[
+  {
+    "title": "\u8d70\u9032\u4fee\u4ed9",
+    "finish": false,
+    "author": "\u543e\u9053\u9577\u4e0d\u5b64",
+    "url": "https://ck101.com/thread-3394780-1-1.html"
+  },
+  {
+    "title": "\u5927\u660e\u5996\u5b7d",
+    "finish": false,
+    "author": "\u51b0\u81e8\u795e\u4e0b",
+    "url": "https://ck101.com/thread-3945463-1-1.html"
+  }
+]
