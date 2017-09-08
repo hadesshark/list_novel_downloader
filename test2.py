@@ -2,7 +2,6 @@
 import requests
 import sys
 from lxml import html
-import time
 import os
 
 import json
@@ -25,25 +24,27 @@ def book_list_item():
         yield item.get('title')
 
 
-class Downloader(object):
+class Contents(object):
     __xpath_post_num = u"//div[@class='plhin']//a//em//text()"
     __xpath_all_num = u"//div[@class='pg']/a[@class='last']//text()"
     __xpath_content_list = u"//td[@class='t_f']"
 
     def __init__(self, url=""):
         self.obj_url = URL(url)
-        self.html_string = HtmlString(url)
         self.content = ''
         self.temp_list = self.insert_list()
 
     def get_contents(self):
         return self.temp_list
+        
+    def analysis(self, path):
+        return self.obj_url.analysis(path)
 
     def page_content_list(self):
-        return self.html_string.analysis(self.__xpath_content_list)
+        return self.analysis(self.__xpath_content_list)
 
     def get_post_num(self):
-        return self.html_string.analysis(self.__xpath_post_num)
+        return self.analysis(self.__xpath_post_num)
 
     def generator_item(self):
         content_list = self.page_content_list()
@@ -64,26 +65,6 @@ class Downloader(object):
             self.obj_url.set_url(self.obj_url.get_next_url())
         return temp_list
 
-
-class HtmlString(object):
-
-    __headers = {
-        'User-Agent':
-        'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
-    }
-
-    def __init__(self, url):
-        self.html_string = self.url_toString(url)
-
-    def url_toString(self, url):
-        response = requests.get(url, headers=self.__headers)
-        if response.status_code == 200:
-            return html.fromstring(response.text.encode('utf-8'))
-        else:
-            return None
-
-    def analysis(self, path):
-        return self.html_string.xpath(path)
         
 def html_string_analysis(url, path):
     __headers = {
@@ -92,11 +73,8 @@ def html_string_analysis(url, path):
     }
     try:
         response = requests.get(url, headers=__headers)
-    except:
-        response = None
-    if response.status_code == 200:
         return html.fromstring(response.text.encode('utf-8')).xpath(path)
-    else:
+    except:
         return None
     
 
@@ -118,26 +96,17 @@ class URL(object):
         return self.url
 
     def get_next_url(self):
-        # try:
-        #     return HtmlString(self.get_url()).analysis(self.__xpath_next_url)[0]
-        # except IndexError:
-        #     return None
         try:
-            return html_string_analysis(self.get_url(), self.__xpath_next_url)[0]
+            return self.analysis(self.__xpath_next_url)[0]
         except IndexError:
             return None
 
     def show_now_url(self):
         sys.stdout.write("\rurl: {0}".format(self.url))
+    
+    def analysis(self, path):
+        return html_string_analysis(self.get_url(), path)
 
-
-class Contents(object):
-
-    def __init__(self):
-        self.contents = Downloader(url).get_contents()
-
-    def get_contents(self):
-        return self.contents
 
 
 class Book(object):
@@ -146,7 +115,7 @@ class Book(object):
     DIR_TXT_FOLDER = os.path.join("bookstore_txt", title + '.txt')
 
     def __init__(self):
-        self.content_obj = Contents().get_contents()
+        self.content_obj = Contents(url).get_contents()
 
     def save_json(self):
         with open(self.DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
