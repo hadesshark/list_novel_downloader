@@ -160,12 +160,24 @@ class Book(object):
 class JsonBook(object):
     def __init__(self, url="", update_flag=False):
         with open("Book.json", encoding="utf-8") as json_file:
-            self.book = json.load(json_file)
-        self.title = self.book.get('title')
-        self.url = self.book.get('url')
-        self.end_url = self.book.get('end_url')
-        self.author = self.book.get('author')
-        self.finish = self.book.get('finish')
+            book = json.load(json_file)
+        self.title = book.get('title')
+        self.url = book.get('url')
+        self.end_url = book.get('end_url')
+        self.author = book.get('author')
+        self.finish = book.get('finish')
+
+    def init_setting(self):
+        with open("Book.json", encoding="utf-8") as json_file:
+            book = json.load(json_file)
+        self.set_title(book.get('title'))
+        self.set_url(book.get('url'))
+        self.set_author(book.get('author'))
+        self.set_finish(book.get('finish'))
+        if not book.get('end_url'):
+            self.set_end_url('')
+        else:
+            self.set_end_url(book.get('end_url'))
 
     def get_title(self):
         return self.title
@@ -174,7 +186,7 @@ class JsonBook(object):
         return self.url
 
     def get_end_url(self):
-        return self.url
+        return self.end_url
 
     def get_author(self):
         return self.author
@@ -230,6 +242,7 @@ class Bookstore(object):
 
 def main():
     json_book = JsonBook()
+    # json_book.init_setting()
     json_bookstore = Bookstore()
     bookstore = json_bookstore.get_bookstore()
 
@@ -238,10 +251,7 @@ def main():
         book = Book(json_book.get_url())
         book.save("txt", "json")
 
-        print("test aaa" + book.get_end_url())
-        # json_book.set_end_url(book.get_end_url())
-        json_book.end_url = book.get_end_url()
-        print("test 123" + json_book.get_end_url())
+        json_book.set_end_url(book.get_end_url())
         item = json_book.get_book_info()
 
         bookstore.append(item)
@@ -254,16 +264,16 @@ def main():
             if json_book.get_title() == item.get('title'):
                 json_book.set_book_info(item)
                 bookstore.pop(index)
-        print(json_book.get_end_url())
-        # book = Book(json_book.get_end_url(), True)
-        # json_book.set_end_url(book.get_end_url())
-        # book.save("txt", "json")
 
-        # item = json_book.get_book_info()
-        # bookstore.append(item)
-        # json_bookstore.save_bookstore_json(bookstore)
+        book = Book(json_book.get_end_url(), True)
+        json_book.set_end_url(book.get_end_url())
+        book.save("txt", "json")
 
-        # print(json_book.get_title() + '更新完畢')
+        item = json_book.get_book_info()
+        bookstore.append(item)
+        json_bookstore.save_bookstore_json(bookstore)
+
+        print(json_book.get_title() + '更新完畢')
 
 
 if __name__ == '__main__':
