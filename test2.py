@@ -84,9 +84,21 @@ class HtmlString(object):
 
     def analysis(self, path):
         return self.html_string.xpath(path)
-
-    def get_html_string(self):
-        return self.html_string
+        
+def html_string_analysis(url, path):
+    __headers = {
+        'User-Agent':
+        'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
+    }
+    try:
+        response = requests.get(url, headers=__headers)
+    except:
+        response = None
+    if response.status_code == 200:
+        return html.fromstring(response.text.encode('utf-8')).xpath(path)
+    else:
+        return None
+    
 
 
 class URL(object):
@@ -106,8 +118,12 @@ class URL(object):
         return self.url
 
     def get_next_url(self):
+        # try:
+        #     return HtmlString(self.get_url()).analysis(self.__xpath_next_url)[0]
+        # except IndexError:
+        #     return None
         try:
-            return HtmlString(self.get_url()).analysis(self.__xpath_next_url)[0]
+            return html_string_analysis(self.get_url(), self.__xpath_next_url)[0]
         except IndexError:
             return None
 
