@@ -128,11 +128,6 @@ class Book(object):
         self.book = BookInitData()
         self.title = self.book.get_title()
 
-        self.DIR_JSON_FOLDER = os.path.join(
-            "bookstore_json", self.title + '.json')
-        self.DIR_TXT_FOLDER = os.path.join(
-            "bookstore_txt", self.title + '.txt')
-
         self.content = Contents(url, update_flag)
         self.content_obj = self.content.get_contents()
 
@@ -146,12 +141,16 @@ class Book(object):
             self.save_json()
 
     def save_json(self):
-        with open(self.DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
+        DIR_JSON_FOLDER = os.path.join("bookstore_json", self.title + '.json')
+
+        with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
             json.dump(self.content_obj, f, indent=2)
 
     def save_txt(self):
+        DIR_TXT_FOLDER = os.path.join("bookstore_txt", self.title + '.txt')
+
         contents = ''
-        with open(self.DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
+        with open(DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
             for item in self.content_obj:
                 contents += ''.join(item["content"])
             txt_file.write(contents)
@@ -166,18 +165,6 @@ class BookInitData(object):
         self.end_url = book.get('end_url')
         self.author = book.get('author')
         self.finish = book.get('finish')
-
-    def init_setting(self):
-        with open("Book.json", encoding="utf-8") as json_file:
-            book = json.load(json_file)
-        self.set_title(book.get('title'))
-        self.set_url(book.get('url'))
-        self.set_author(book.get('author'))
-        self.set_finish(book.get('finish'))
-        if not book.get('end_url'):
-            self.set_end_url('')
-        else:
-            self.set_end_url(book.get('end_url'))
 
     def get_title(self):
         return self.title
@@ -209,14 +196,14 @@ class BookInitData(object):
     def set_end_url(self, end_url):
         self.end_url = end_url
 
-    def get_book_info(self):
+    def get_info(self):
         return {'title': self.get_title(),
                 'author': self.get_author(),
                 'url': self.get_url(),
                 'finish': self.get_finish(),
                 'end_url': self.get_end_url()}
 
-    def set_book_info(self, bookstore_item):
+    def set_info(self, bookstore_item):
         self.set_title(bookstore_item.get('title'))
         self.set_author(bookstore_item.get('author'))
         self.set_url(bookstore_item.get('url'))
@@ -229,52 +216,53 @@ class Bookstore(object):
     def __init__(self):
         self.book_list = ''
 
-    def get_bookstore(self):
+    def get_book_list(self):
         with open("Bookstore.json", encoding="utf-8") as json_file:
             self.book_list = json.load(json_file)
         return self.book_list
 
-    def save_bookstore_json(self, book_list):
+    def update(self, book_list):
         with open("Bookstore.json", mode="w", encoding="utf-8") as json_file:
             json.dump(book_list, json_file, indent=2)
 
     def book_list_title(self):
-        temp_list = self.get_bookstore()
+        temp_list = self.get_book_list()
         for item in temp_list:
             yield item.get('title')
 
 
 def main():
     book_init_data = BookInitData()
-    json_bookstore = Bookstore()
-    book_list = json_bookstore.get_bookstore()
+    bookstore = Bookstore()
+    book_list = bookstore.get_book_list()
 
-    if not book_init_data.get_title() in json_bookstore.book_list_title():
+    if not book_init_data.get_title() in bookstore.book_list_title():
 
         book = Book(book_init_data.get_url())
         book.save("txt", "json")
 
         book_init_data.set_end_url(book.get_end_url())
-        item = book_init_data.get_book_info()
+        item = book_init_data.get_info()
 
         book_list.append(item)
-        json_bookstore.save_bookstore_json(book_list)
+        bookstore.update(book_list)
     else:
         print(book_init_data.get_title() + ' 已在資料庫中')
 
         for index, item in enumerate(book_list):
             if book_init_data.get_title() == item.get('title'):
-                book_init_data.set_book_info(item)
+                book_init_data.set_info(item)
                 book_list.pop(index)
+                break
 
         book = Book(book_init_data.get_end_url(), True)
         book.save("txt", "json")
 
         book_init_data.set_end_url(book.get_end_url())
-        item = book_init_data.get_book_info()
+        item = book_init_data.get_info()
 
         book_list.append(item)
-        json_bookstore.save_bookstore_json(book_list)
+        bookstore.update(book_list)
 
         print(book_init_data.get_title() + '更新完畢')
 
