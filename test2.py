@@ -197,6 +197,10 @@ class Bookstore(object):
         for item in temp_list:
             yield item.get('title')
 
+    def not_have_book(self, book):
+        # book_init_data.get_title() in bookstore.book_list_title()
+        return False if book in self.book_list_title() else True
+
 
 class Book(BookInitData):
 
@@ -207,14 +211,28 @@ class Book(BookInitData):
         self.content = Contents(url, update_flag)
         self.content_obj = self.content.get_contents()
 
+        self.contents_list = []
+
     def get_end_url(self):
         return self.content.get_end_url()
+
+    def add_contents(self, content):
+        self.contents_list.append(content)
+
+    def get_contents(self):
+        return self.contents_list
 
     def save(self, *filetype):
         if "txt" in filetype:
             self.save_txt()
         if "json" in filetype:
             self.save_json()
+
+    def save_file(self, filetype, contents):
+        DIR_FOLDER = os.path.join(
+            "bookstore_" + filetype, self.title + '.' + filetype)
+        with open(DIR_FOLDER, mode="w", encoding="utf-8") as f:
+            json.dump(self.content_obj, f, indent=2)
 
     def save_json(self):
         DIR_JSON_FOLDER = os.path.join("bookstore_json", self.title + '.json')
@@ -232,35 +250,11 @@ class Book(BookInitData):
             txt_file.write(contents)
 
 
-def bookstore_update():
+def bookstore_new():
     book_init_data = BookInitData()
     bookstore = Bookstore()
     book_list = bookstore.get_book_list()
-
-    temp_obj = []
-    while(not len(book_list) == 0):
-        book_init_data.set_info(book_list.pop())
-        print(book_init_data.get_title() + ' 已在資料庫中')
-
-        book = Book(book_init_data.get_end_url(), True)
-        book.save("txt", "json")
-
-        book.set_end_url(book.get_end_url())
-        item = book.get_info()
-
-        temp_obj.append(item)
-        bookstore.update(temp_obj)
-
-        print(book_init_data.get_title() + '更新完畢')
-        print("===============================================")
-
-
-def main():
-    book_init_data = BookInitData()
-    bookstore = Bookstore()
-    book_list = bookstore.get_book_list()
-
-    if not book_init_data.get_title() in bookstore.book_list_title():
+    if bookstore.not_have_book(book_init_data.get_title()):
 
         book = Book(book_init_data.get_url())
         book.save("txt", "json")
@@ -270,8 +264,35 @@ def main():
 
         book_list.append(item)
         bookstore.update(book_list)
-    else:
-        bookstore_update()
+
+
+def bookstore_update():
+    book_init_data = BookInitData()
+    bookstore = Bookstore()
+    book_list = bookstore.get_book_list()
+
+    temp_obj = []
+
+    for obj in book_list:
+        book_init_data.set_info(obj)
+        print(book_init_data.get_title() + ' 已在資料庫中')
+
+        book = Book(book_init_data.get_end_url(), True)
+        book.save("txt", "json")
+
+        book.set_info(obj)
+        book.set_end_url(book.get_end_url())
+        item = book.get_info()
+
+        temp_obj.append(item)
+
+        print("\n" + book_init_data.get_title() + ' 更新完畢')
+        print("===============================================")
+    bookstore.update(temp_obj)
+
+
+def main():
+    bookstore_new()
 
 
 if __name__ == '__main__':
