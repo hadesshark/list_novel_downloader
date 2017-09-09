@@ -122,42 +122,8 @@ class URL(object):
         return html_string_analysis(self.get_url(), path)
 
 
-class Book(object):
-
-    def __init__(self, url="", update_flag=False):
-        self.book = BookInitData()
-        self.title = self.book.get_title()
-
-        self.content = Contents(url, update_flag)
-        self.content_obj = self.content.get_contents()
-
-    def get_end_url(self):
-        return self.content.get_end_url()
-
-    def save(self, *filetype):
-        if "txt" in filetype:
-            self.save_txt()
-        if "json" in filetype:
-            self.save_json()
-
-    def save_json(self):
-        DIR_JSON_FOLDER = os.path.join("bookstore_json", self.title + '.json')
-
-        with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
-            json.dump(self.content_obj, f, indent=2)
-
-    def save_txt(self):
-        DIR_TXT_FOLDER = os.path.join("bookstore_txt", self.title + '.txt')
-
-        contents = ''
-        with open(DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
-            for item in self.content_obj:
-                contents += ''.join(item["content"])
-            txt_file.write(contents)
-
-
 class BookInitData(object):
-    def __init__(self, url="", update_flag=False):
+    def __init__(self):
         with open("Book.json", encoding="utf-8") as json_file:
             book = json.load(json_file)
         self.title = book.get('title')
@@ -231,6 +197,40 @@ class Bookstore(object):
             yield item.get('title')
 
 
+class Book(BookInitData):
+
+    def __init__(self, url="", update_flag=False):
+        super().__init__()
+        self.title = self.get_title()
+
+        self.content = Contents(url, update_flag)
+        self.content_obj = self.content.get_contents()
+
+    def get_end_url(self):
+        return self.content.get_end_url()
+
+    def save(self, *filetype):
+        if "txt" in filetype:
+            self.save_txt()
+        if "json" in filetype:
+            self.save_json()
+
+    def save_json(self):
+        DIR_JSON_FOLDER = os.path.join("bookstore_json", self.title + '.json')
+
+        with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
+            json.dump(self.content_obj, f, indent=2)
+
+    def save_txt(self):
+        DIR_TXT_FOLDER = os.path.join("bookstore_txt", self.title + '.txt')
+
+        contents = ''
+        with open(DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
+            for item in self.content_obj:
+                contents += ''.join(item["content"])
+            txt_file.write(contents)
+
+
 def main():
     book_init_data = BookInitData()
     bookstore = Bookstore()
@@ -241,8 +241,8 @@ def main():
         book = Book(book_init_data.get_url())
         book.save("txt", "json")
 
-        book_init_data.set_end_url(book.get_end_url())
-        item = book_init_data.get_info()
+        book.set_end_url(book.get_end_url())
+        item = book.get_info()
 
         book_list.append(item)
         bookstore.update(book_list)
@@ -258,8 +258,8 @@ def main():
         book = Book(book_init_data.get_end_url(), True)
         book.save("txt", "json")
 
-        book_init_data.set_end_url(book.get_end_url())
-        item = book_init_data.get_info()
+        book.set_end_url(book.get_end_url())
+        item = book.get_info()
 
         book_list.append(item)
         bookstore.update(book_list)
