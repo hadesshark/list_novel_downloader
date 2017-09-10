@@ -198,8 +198,13 @@ class Bookstore(object):
             yield item.get('title')
 
     def not_have_book(self, book):
-        # book_init_data.get_title() in bookstore.book_list_title()
-        return False if book in self.book_list_title() else True
+        return False if book.get_title() in self.book_list_title() else True
+
+    def add_book(self, book):
+        book_obj = book.get_info()
+        self.book_list = self.get_book_list()
+        self.book_list.append(book_obj)
+        self.update(self.book_list)
 
 
 class Book(BookInitData):
@@ -212,6 +217,8 @@ class Book(BookInitData):
         self.content_obj = self.content.get_contents()
 
         self.contents_list = []
+
+        self.set_end_url(self.get_end_url())
 
     def get_end_url(self):
         return self.content.get_end_url()
@@ -253,17 +260,12 @@ class Book(BookInitData):
 def bookstore_new():
     book_init_data = BookInitData()
     bookstore = Bookstore()
-    book_list = bookstore.get_book_list()
     if bookstore.not_have_book(book_init_data.get_title()):
 
         book = Book(book_init_data.get_url())
         book.save("txt", "json")
 
-        book.set_end_url(book.get_end_url())
-        item = book.get_info()
-
-        book_list.append(item)
-        bookstore.update(book_list)
+        bookstore.add_book(book)
 
 
 def bookstore_update():
@@ -281,9 +283,8 @@ def bookstore_update():
         book.save("txt", "json")
 
         book.set_info(obj)
-        book.set_end_url(book.get_end_url())
-        item = book.get_info()
 
+        item = book.get_info()
         temp_obj.append(item)
 
         print("\n" + book_init_data.get_title() + ' 更新完畢')
