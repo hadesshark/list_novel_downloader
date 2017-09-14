@@ -176,6 +176,10 @@ class BookInitData(object):
         self.set_finish(bookstore_item.get('finish'))
         self.set_end_url(bookstore_item.get('end_url'))
 
+    def update_data(self):
+        with open("Book.json", mode="w", encoding="utf-8") as json_file:
+            json.dump(self.get_info(), json_file, indent=2)
+
 
 class Bookstore(object):
 
@@ -268,10 +272,8 @@ def bookstore_update():
 
     for obj in book_list:
         book_init_data.set_info(obj)
+        book_init_data.update_data()
         print(book_init_data.get_title() + ' 已在資料庫中')
-
-        with open("Book.json", mode="w", encoding="utf-8") as json_file:
-            json.dump(book_init_data.get_info(), json_file, indent=2)
 
         book = Book(book_init_data.get_end_url(), True)
         book.save("txt", "json")
