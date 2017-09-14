@@ -223,9 +223,6 @@ class Book(BookInitData):
     def get_end_url(self):
         return self.content.get_end_url()
 
-    def add_contents(self, content):
-        self.contents_list.append(content)
-
     def get_contents(self):
         return self.contents_list
 
@@ -234,12 +231,6 @@ class Book(BookInitData):
             self.save_txt()
         if "json" in filetype:
             self.save_json()
-
-    def save_file(self, filetype, contents):
-        DIR_FOLDER = os.path.join(
-            "bookstore_" + filetype, self.title + '.' + filetype)
-        with open(DIR_FOLDER, mode="w", encoding="utf-8") as f:
-            json.dump(self.content_obj, f, indent=2)
 
     def save_json(self):
         DIR_JSON_FOLDER = os.path.join("bookstore_json", self.title + '.json')
@@ -260,7 +251,7 @@ class Book(BookInitData):
 def bookstore_new():
     book_init_data = BookInitData()
     bookstore = Bookstore()
-    if bookstore.not_have_book(book_init_data.get_title()):
+    if bookstore.not_have_book(book_init_data):
 
         book = Book(book_init_data.get_url())
         book.save("txt", "json")
@@ -279,6 +270,9 @@ def bookstore_update():
         book_init_data.set_info(obj)
         print(book_init_data.get_title() + ' 已在資料庫中')
 
+        with open("Book.json", mode="w", encoding="utf-8") as json_file:
+            json.dump(book_init_data.get_info(), json_file, indent=2)
+
         book = Book(book_init_data.get_end_url(), True)
         book.save("txt", "json")
 
@@ -293,8 +287,8 @@ def bookstore_update():
 
 
 def main():
-    bookstore_new()
-
+    # bookstore_new()
+    bookstore_update()
 
 if __name__ == '__main__':
     main()
