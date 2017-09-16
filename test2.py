@@ -6,6 +6,8 @@ import os
 
 import json
 
+from JsonInit import JsonFile as JsonFile
+
 
 class Contents(object):
     __xpath_post_num = u"//div[@class='plhin']//a//em//text()"
@@ -24,7 +26,7 @@ class Contents(object):
 
     def set_contents(self):
         DIR_JSON_FOLDER = os.path.join(
-            "bookstore_json", BookInitData().get_title() + '.json')
+            "bookstore_json", JsonFile().__str__() + '.json')
         with open(DIR_JSON_FOLDER, encoding="utf-8") as json_file:
             contents = json.load(json_file)
         self.temp_list = contents
@@ -236,14 +238,17 @@ class Book(BookInitData):
         if "json" in filetype:
             self.save_json()
 
+    def get_save_title(self):
+        return JsonFile().__str__()
+
     def save_json(self):
-        DIR_JSON_FOLDER = os.path.join("bookstore_json", self.title + '.json')
+        DIR_JSON_FOLDER = os.path.join("bookstore_json", self.get_save_title() + '.json')
 
         with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
             json.dump(self.content_obj, f, indent=2)
 
     def save_txt(self):
-        DIR_TXT_FOLDER = os.path.join("bookstore_txt", self.title + '.txt')
+        DIR_TXT_FOLDER = os.path.join("bookstore_txt", self.get_save_title() + '.txt')
 
         contents = ''
         with open(DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:

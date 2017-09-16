@@ -92,9 +92,6 @@ class Novel(object):
         with open(self.save_name_and_address(), 'w', encoding='utf-8') as f:
             f.write(self.content)
 
-    # def show_title(self):
-    #     self.info.show_title()
-
     def show_title_author(self):
         self.info.show_title_author()
 
