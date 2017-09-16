@@ -11,7 +11,14 @@ class JsonFile(object):
         self.url = self.json_data.get('url')
         self.author = self.json_data.get('author')
         self.finish = self.json_data.get('finish')
+        self.end_url = self.json_data.get('end_url')
         self.str = ''
+
+    def get_end_url(self):
+        return self.end_url
+
+    def set_end_url(self, end_url):
+        self.end_url = end_url
 
     def get_title(self):
         return self.title
@@ -50,7 +57,8 @@ class JsonFile(object):
         'title': self.title,
         'url': self.url,
         'author': self.author,
-        'finish': self.finish }
+        'finish': self.finish,
+        'end_url': self.end_url}
 
     def __del__(self):
         if self.title != self.json_data.get('title'):
