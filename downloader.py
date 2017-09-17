@@ -84,8 +84,6 @@ class Novel(object):
 
     def __init__(self, base_setting=SettingInfo()):
         self.info = base_setting
-        self.title = self.info.get_title()
-        self.author = self.info.get_author()
         self.content = Content().collect(self.info)
 
     def save(self):

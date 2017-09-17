@@ -20,10 +20,11 @@ class Contents(object):
         self.update_flag = update_flag
         self.end_url = ''
 
-    def get_end_url(self):
+    def get_end_url(self):  # 需要修改
         return self.end_url
 
     def set_contents(self):
+        # 需要判斷是否有內容，如果有要先取出
         contents = OpenWrite().get_book_content()
         self.temp_list = contents
 
@@ -35,12 +36,15 @@ class Contents(object):
         return self.temp_list
 
     def analysis(self, path):
+        # 這個寫法不好，要改
         return self.obj_url.analysis(path)
 
     def page_content_list(self):
+        # 和上面的方法一樣要改
         return self.analysis(self.__xpath_content_list)
 
     def get_post_num(self):
+        # 不應該在 Content 內
         return self.analysis(self.__xpath_post_num)
 
     def generator_item(self):
@@ -51,6 +55,21 @@ class Contents(object):
             yield {"id": chapter_num, "content": one_content}
 
     def insert_list(self):
+        # 要改， Content 內應該判斷要屬於 Content 相關類型
+        """
+        temp_list = []
+        while self.have_content():
+            # 這一段在這有點怪
+            self.obj_url.set_end_url(self.obj_url.get_url)
+
+            for item in (self.generator_item()):
+                temp_list.append(item)
+
+            # 這一段在這也是有點怪
+            self.obj_url.set_url(self.obj_url.get_next_url())
+        return temp_list
+        """
+
         temp_list = []
         while self.obj_url.have_url():
             self.end_url = self.obj_url.get_url()
@@ -122,7 +141,7 @@ class URL(object):
 
 class BookInitData(JsonFile):
     def __init__(self):
-        super().__init__(self)
+        super().__init__()
 
     def get_info(self):
         return {'title': self.get_title(),
