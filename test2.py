@@ -294,8 +294,8 @@ def bookstore_update():
 
 
 def main():
-    # bookstore_new()
-    bookstore_update()
+    bookstore_new()
+    # bookstore_update()
 
 if __name__ == '__main__':
     main()
