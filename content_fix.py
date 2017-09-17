@@ -14,7 +14,7 @@ def show_information(file_name, system_name):
 class Content(object):
 
     def __init__(self):
-        self.txt_space = r"./txt_file//"
+        self.txt_space = r"./bookstore_txt//"
         self.before_update = self.txt_space + "temp.txt"
         self.after_update = self.txt_space + "temp2.txt"
 

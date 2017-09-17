@@ -4,9 +4,8 @@ import sys
 from lxml import html
 import os
 
-import json
-
 from JsonInit import JsonFile as JsonFile
+from JsonInit import OpenWrite as OpenWrite
 
 
 class Contents(object):
@@ -21,14 +20,12 @@ class Contents(object):
         self.update_flag = update_flag
         self.end_url = ''
 
-    def get_end_url(self):
+    def get_end_url(self):  # 需要修改
         return self.end_url
 
     def set_contents(self):
-        DIR_JSON_FOLDER = os.path.join(
-            "bookstore_json", JsonFile().__str__() + '.json')
-        with open(DIR_JSON_FOLDER, encoding="utf-8") as json_file:
-            contents = json.load(json_file)
+        # 需要判斷是否有內容，如果有要先取出
+        contents = OpenWrite().get_book_content()
         self.temp_list = contents
 
     def get_contents(self):
@@ -39,12 +36,15 @@ class Contents(object):
         return self.temp_list
 
     def analysis(self, path):
+        # 這個寫法不好，要改
         return self.obj_url.analysis(path)
 
     def page_content_list(self):
+        # 和上面的方法一樣要改
         return self.analysis(self.__xpath_content_list)
 
     def get_post_num(self):
+        # 不應該在 Content 內
         return self.analysis(self.__xpath_post_num)
 
     def generator_item(self):
@@ -55,6 +55,21 @@ class Contents(object):
             yield {"id": chapter_num, "content": one_content}
 
     def insert_list(self):
+        # 要改， Content 內應該判斷要屬於 Content 相關類型
+        """
+        temp_list = []
+        while self.have_content():
+            # 這一段在這有點怪
+            self.obj_url.set_end_url(self.obj_url.get_url)
+
+            for item in (self.generator_item()):
+                temp_list.append(item)
+
+            # 這一段在這也是有點怪
+            self.obj_url.set_url(self.obj_url.get_next_url())
+        return temp_list
+        """
+
         temp_list = []
         while self.obj_url.have_url():
             self.end_url = self.obj_url.get_url()
@@ -124,45 +139,9 @@ class URL(object):
         return html_string_analysis(self.get_url(), path)
 
 
-class BookInitData(object):
+class BookInitData(JsonFile):
     def __init__(self):
-        with open("Book.json", encoding="utf-8") as json_file:
-            book = json.load(json_file)
-        self.title = book.get('title')
-        self.url = book.get('url')
-        self.end_url = book.get('end_url')
-        self.author = book.get('author')
-        self.finish = book.get('finish')
-
-    def get_title(self):
-        return self.title
-
-    def get_url(self):
-        return self.url
-
-    def get_end_url(self):
-        return self.end_url
-
-    def get_author(self):
-        return self.author
-
-    def get_finish(self):
-        return self.finish
-
-    def set_title(self, title):
-        self.title = title
-
-    def set_url(self, url):
-        self.url = url
-
-    def set_author(self, author):
-        self.author = author
-
-    def set_finish(self, finish):
-        self.finish = finish
-
-    def set_end_url(self, end_url):
-        self.end_url = end_url
+        super().__init__()
 
     def get_info(self):
         return {'title': self.get_title(),
@@ -179,8 +158,7 @@ class BookInitData(object):
         self.set_end_url(bookstore_item.get('end_url'))
 
     def update_data(self):
-        with open("Book.json", mode="w", encoding="utf-8") as json_file:
-            json.dump(self.get_info(), json_file, indent=2)
+        OpenWrite().Book_init_update(self.get_info())
 
 
 class Bookstore(object):
@@ -188,15 +166,13 @@ class Bookstore(object):
     def __init__(self, file_name="Bookstore.json"):
         self.book_list = ''
         self.file_name = file_name
+        self.openwrite = OpenWrite()
 
     def get_book_list(self):
-        with open(self.file_name, encoding="utf-8") as json_file:
-            self.book_list = json.load(json_file)
-        return self.book_list
+        self.openwrite.get_book_list()
 
     def update(self, book_list):
-        with open(self.file_name, mode="w", encoding="utf-8") as json_file:
-            json.dump(book_list, json_file, indent=2)
+        self.openwrite.Bookstore_list_update(book_list)
 
     def book_list_title(self):
         temp_list = self.get_book_list()
@@ -225,6 +201,7 @@ class Book(BookInitData):
         self.contents_list = []
 
         self.set_end_url(self.get_end_url())
+        self.openwrite = OpenWrite()
 
     def get_end_url(self):
         return self.content.get_end_url()
@@ -238,23 +215,11 @@ class Book(BookInitData):
         if "json" in filetype:
             self.save_json()
 
-    def get_save_title(self):
-        return JsonFile().__str__()
-
     def save_json(self):
-        DIR_JSON_FOLDER = os.path.join("bookstore_json", self.get_save_title() + '.json')
-
-        with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
-            json.dump(self.content_obj, f, indent=2)
+        self.openwrite.save_book_json(self.content_obj)
 
     def save_txt(self):
-        DIR_TXT_FOLDER = os.path.join("bookstore_txt", self.get_save_title() + '.txt')
-
-        contents = ''
-        with open(DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
-            for item in self.content_obj:
-                contents += ''.join(item["content"])
-            txt_file.write(contents)
+        self.openwrite.save_book_txt(self.content_obj)
 
 
 def bookstore_new():
@@ -296,6 +261,7 @@ def bookstore_update():
 def main():
     bookstore_new()
     # bookstore_update()
+
 
 if __name__ == '__main__':
     main()
