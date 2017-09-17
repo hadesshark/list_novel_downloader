@@ -124,45 +124,9 @@ class URL(object):
         return html_string_analysis(self.get_url(), path)
 
 
-class BookInitData(object):
+class BookInitData(JsonFile):
     def __init__(self):
-        with open("Book.json", encoding="utf-8") as json_file:
-            book = json.load(json_file)
-        self.title = book.get('title')
-        self.url = book.get('url')
-        self.end_url = book.get('end_url')
-        self.author = book.get('author')
-        self.finish = book.get('finish')
-
-    def get_title(self):
-        return self.title
-
-    def get_url(self):
-        return self.url
-
-    def get_end_url(self):
-        return self.end_url
-
-    def get_author(self):
-        return self.author
-
-    def get_finish(self):
-        return self.finish
-
-    def set_title(self, title):
-        self.title = title
-
-    def set_url(self, url):
-        self.url = url
-
-    def set_author(self, author):
-        self.author = author
-
-    def set_finish(self, finish):
-        self.finish = finish
-
-    def set_end_url(self, end_url):
-        self.end_url = end_url
+        super().__init__()
 
     def get_info(self):
         return {'title': self.get_title(),
