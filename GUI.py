@@ -5,9 +5,10 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, RadioField
 from wtforms.validators import Required
 
-from downloader import Novel, SettingInfo
 from content_fix import Content
 from download_txt import SimpleToTW
+
+from test2 import BookInitData, Book, bookstore_new, bookstore_update
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
@@ -19,13 +20,13 @@ class NovelForm(FlaskForm):
     name = StringField('Title: ')
     author = StringField('author: ')
     url = StringField('URL: ')
-    finish = RadioField('Label', choices=[('yes', '已完結'), ('no', '連載中')])
+    finish = RadioField('Label', choices=[(False, '已完結'), (True, '連載中')])
     submit = SubmitField('download')
 
 
-def novel_download(jsonfile):
-    novel = Novel(jsonfile)
-    novel.save()
+def novel_download():
+    novel = Book()
+    novel.save("txt", "json")
 
 
 def content_fix():
@@ -36,11 +37,11 @@ class SettingForm(FlaskForm):
     name = StringField('Title: ', validators=[Required()])
     author = StringField('Author: ', validators=[])
     url = StringField('URL: ', validators=[Required()])
-    finish = RadioField('Label', choices=[('yes', '已完結'), ('no', '連載中')])
+    finish = RadioField('Label', choices=[(False, '已完結'), (True, '連載中')])
     submit = SubmitField('Save')
 
 
-class JsonFile(SettingInfo):
+class JsonFile(BookInitData):
 
     def get_info(self):
         return (self.get_title(), self.get_author(), self.get_url(), self.get_finish())
@@ -74,7 +75,8 @@ def index():
 
     if request.method == 'POST':
         if request.form['submit'] == 'download':
-            novel_download(JsonFile())  # 這樣寫不太好，需要改
+            # novel_download()  # 這樣寫不太好，需要改
+            bookstore_new()
             content_fix()
             flash('下載完成！！')
         elif request.form['submit'] == 'convert':
@@ -92,7 +94,7 @@ def setting():
     url = None
     finish = None
 
-    form = SettingForm()
+    form = BookInitData()
     if form.validate_on_submit() and request.method == 'POST':
         name = form.name.data
         author = form.author.data

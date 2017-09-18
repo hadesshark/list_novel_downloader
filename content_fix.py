@@ -4,7 +4,7 @@ import shutil
 
 from tqdm import *
 
-from initialize import JsonFile as JsonFile
+from JsonInit import JsonFile as JsonFile
 
 
 def show_information(file_name, system_name):
@@ -19,7 +19,7 @@ class Content(object):
         self.after_update = self.txt_space + "temp2.txt"
 
         self.json_file = JsonFile()
-        self.finish_version = self.txt_space + self.json_file.__str__()
+        self.finish_version = self.txt_space + self.json_file.__str__() + '.txt'
         self.file_name = self.json_file.__str__()
 
         self.content = "".encode('utf-8')
