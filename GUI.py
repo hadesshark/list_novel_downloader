@@ -9,6 +9,7 @@ from content_fix import Content
 from download_txt import SimpleToTW
 
 from test2 import BookInitData, Book, bookstore_new, bookstore_update
+from JsonInit import JsonFile
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
@@ -37,11 +38,11 @@ class SettingForm(FlaskForm):
     name = StringField('Title: ', validators=[Required()])
     author = StringField('Author: ', validators=[])
     url = StringField('URL: ', validators=[Required()])
-    finish = RadioField('Label', choices=[(False, '已完結'), (True, '連載中')])
+    finish = RadioField('Label', choices=[("False", '已完結'), ("True", '連載中')])
     submit = SubmitField('Save')
 
 
-class JsonFile(BookInitData):
+class JsonFile(JsonFile):
 
     def get_info(self):
         return (self.get_title(), self.get_author(), self.get_url(), self.get_finish())
@@ -75,7 +76,6 @@ def index():
 
     if request.method == 'POST':
         if request.form['submit'] == 'download':
-            # novel_download()  # 這樣寫不太好，需要改
             bookstore_new()
             content_fix()
             flash('下載完成！！')
@@ -94,12 +94,22 @@ def setting():
     url = None
     finish = None
 
-    form = BookInitData()
-    if form.validate_on_submit() and request.method == 'POST':
+    form = SettingForm()
+
+    print(form.name.data)
+    print(form.author.data)
+    print(form.url.data)
+    print(form.finish.data)
+
+    if form.validate() and request.method == 'POST':
         name = form.name.data
         author = form.author.data
         url = form.url.data
         finish = form.finish.data
+        if finish == "True":
+            finish = True
+        else:
+            finish = False
 
         JsonFile().set_info(name, author, url, finish)
 
