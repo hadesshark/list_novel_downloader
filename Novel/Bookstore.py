@@ -18,3 +18,7 @@ def get_books_menu():
 
 def add_book(book):
     pass
+
+
+def get_contents():
+    pass
