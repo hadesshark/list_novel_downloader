@@ -48,7 +48,7 @@ class JsonFile(object):
         self.str = self.get_title()
         if len(self.author):
             self.str = self.str + ' 作者：{0}'.format(self.get_author())
-        if self.get_finish() == False:
+        if self.get_finish() == "False":
             self.str = '連載中 ' + self.str
         return self.str
 

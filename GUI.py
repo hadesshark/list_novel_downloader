@@ -21,7 +21,7 @@ class NovelForm(FlaskForm):
     name = StringField('Title: ')
     author = StringField('author: ')
     url = StringField('URL: ')
-    finish = RadioField('Label', choices=[(False, '已完結'), (True, '連載中')])
+    finish = RadioField('Label', choices=[("True", '已完結'), ("False", '連載中')])
     submit = SubmitField('download')
 
 
@@ -38,7 +38,7 @@ class SettingForm(FlaskForm):
     name = StringField('Title: ', validators=[Required()])
     author = StringField('Author: ', validators=[])
     url = StringField('URL: ', validators=[Required()])
-    finish = RadioField('Label', choices=[("False", '已完結'), ("True", '連載中')])
+    finish = RadioField('Label', choices=[("True", '已完結'), ("False", '連載中')])
     submit = SubmitField('Save')
 
 
@@ -79,9 +79,12 @@ def index():
             bookstore_new()
             content_fix()
             flash('下載完成！！')
-        elif request.form['submit'] == 'convert':
-            convert()
-            flash('轉換成功！！')
+        # elif request.form['submit'] == 'convert':
+        #     convert()
+        #     flash('轉換成功！！')
+        elif request.form['submit'] == 'Bookstore_update':
+            bookstore_update()
+            flash('更新完畢！！')
 
     data = Data(download_form, name, author, url, finish)
     return render_template('index.html', data=data)
@@ -96,34 +99,25 @@ def setting():
 
     form = SettingForm()
 
-    print(form.name.data)
-    print(form.author.data)
-    print(form.url.data)
-    print(form.finish.data)
-
     if form.validate() and request.method == 'POST':
         name = form.name.data
         author = form.author.data
         url = form.url.data
         finish = form.finish.data
-        if finish == "True":
-            finish = True
-        else:
-            finish = False
+
+        print(form.name.data)
+        print(form.author.data)
+        print(form.url.data)
+        print(form.finish.data)
 
         JsonFile().set_info(name, author, url, finish)
+        print(JsonFile().get_finish())
 
         flash('設定成功!!')
 
     data = Data(form, name, author, url, finish)
 
     return render_template('setting.html', data=data)
-
-
-@app.route('/list_downloader', methods=['POST,', 'GET'])
-def list_downloader():
-
-    return render_template('list_downloader.html', data=data)
 
 
 if __name__ == '__main__':
