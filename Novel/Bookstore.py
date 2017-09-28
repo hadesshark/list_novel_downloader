@@ -1,24 +1,32 @@
 # -*- coding: utf-8 -*-
 
-def get_book(book):
-    pass
+from Book import Book
+
+import json
 
 
-def update():
-    pass
+class Bookstore(object):
 
+    def __init__(self):
+        self.file_name = "data/Bookstore.json"
+        self.book_list = []
 
-def check_have_book(book):
-    pass
+    def get_book_list(self):
+        with open(self.file_name, encoding="utf-8") as json_file:
+            self.book_list = json.load(json_file)
+        return self.book_list
 
+    def book_list_title(self):
+        temp_list = self.get_book_list()
+        for item in temp_list:
+            yield item.get('title')
 
-def get_books_menu():
-    pass
+    def check_have(self, book):
+        return True if book.get_title() in self.book_list_title() else False
 
-
-def add_book(book):
-    pass
-
-
-def get_contents():
-    pass
+    def add_book(self, book):
+        book_obj = book.get_info()
+        self.book_list = self.get_book_list()
+        self.book_list.append(book_obj)
+        with open(self.file_name, mode="w", encoding="utf-8") as json_file:
+            json.dump(self.book_list, json_file, indent=2)
