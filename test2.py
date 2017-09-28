@@ -244,16 +244,18 @@ def bookstore_update():
         book_init_data.update_data()
         print(book_init_data.get_title() + ' 已在資料庫中')
 
-        book = Book(book_init_data.get_end_url(), True)
-        book.save("txt", "json")
+        if book_init_data.get_finish() != "True":
 
-        book.set_info(obj)
+            book = Book(book_init_data.get_end_url(), True)
+            book.save("txt", "json")
 
-        item = book.get_info()
-        temp_obj.append(item)
+            book.set_info(obj)
 
-        print("\n" + book_init_data.get_title() + ' 更新完畢')
-        print("===============================================")
+            item = book.get_info()
+            temp_obj.append(item)
+
+            print("\n" + book_init_data.get_title() + ' 更新完畢')
+            print("===============================================")
     bookstore.update(temp_obj)
 
 
