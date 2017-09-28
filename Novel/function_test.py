@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from Book import Book
+from Bookstore import Bookstore
+
 # gui 版本
 # 主畫面 書庫頁
 # 顯示書籍資料
@@ -6,29 +9,30 @@
 # 功能
 ## 新增書籍
 ## 跳出 diaolod
+def bookstore_new_book():
+    ## 設定書籍基本資料
+    title = None
+    author = None
+    url = None
+    finish = None
+    book = Book()
+    book.set_info(title, author, url, finish)
 
-## 設定書籍基本資料
+    ## 判斷書庫中是否有這本書
+    bookstore = Bookstore()
+    if not bookstore.check_have(book):
+        ## 如果 沒有 增加這本書
+        """
+        這裡 book 是否要增加 Contents ?
+        """
+        bookstore.add_book(book)
+    # finish
 
-from Book import Book
-from Bookstore import Bookstore
-
-title = None
-author = None
-url = None
-finish = None
-book = Book()
-book.set_info(title, author, url, finish)
-
-## 判斷書庫中是否有這本書
-bookstore = Bookstore()
-if not bookstore.check_have(book):
-    ## 如果 沒有 增加這本書
-    bookstore.add_book(book)
-
-# finish
+# bookstore_new_book()
 """
 希望有設定後有跑馬燈效果
 """
+
 ## 在線閱讀
 
 
