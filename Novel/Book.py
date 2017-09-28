@@ -17,6 +17,9 @@ class Book(object):
 
         self._str = ''
 
+        # 重點！！
+        self.content = ''
+
     def set_title(self, title=''):
         self.title = title
 

@@ -206,13 +206,15 @@ class Book(BookInitData):
         return JsonFile().__str__()
 
     def save_json(self):
-        DIR_JSON_FOLDER = os.path.join("bookstore_json", self.get_save_title() + '.json')
+        DIR_JSON_FOLDER = os.path.join(
+            "bookstore_json", self.get_save_title() + '.json')
 
         with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
             json.dump(self.content_obj, f, indent=2)
 
     def save_txt(self):
-        DIR_TXT_FOLDER = os.path.join("bookstore_txt", self.get_save_title() + '.txt')
+        DIR_TXT_FOLDER = os.path.join(
+            "bookstore_txt", self.get_save_title() + '.txt')
 
         contents = ''
         with open(DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
@@ -222,6 +224,12 @@ class Book(BookInitData):
 
 
 def bookstore_new():
+    """
+    book = Book()
+    bookstore = Bookstore()
+    if not bookstore.check_have(book):
+        bookstore.add_book(book)
+    """
     book_init_data = BookInitData()
     bookstore = Bookstore()
     if bookstore.not_have_book(book_init_data):
@@ -233,6 +241,10 @@ def bookstore_new():
 
 
 def bookstore_update():
+    """
+    
+
+    """
     book_init_data = BookInitData()
     bookstore = Bookstore()
     book_list = bookstore.get_book_list()
@@ -262,6 +274,7 @@ def bookstore_update():
 def main():
     bookstore_new()
     # bookstore_update()
+
 
 if __name__ == '__main__':
     main()

@@ -7,3 +7,7 @@ def get_chapter(chapter_number):
 
 def save():
     pass
+
+
+def check_new_chapter():
+    pass
