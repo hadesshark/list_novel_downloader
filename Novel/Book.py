@@ -42,8 +42,13 @@ class Book(object):
         self.set_url(url)
         self.set_finish(finish)
 
+    def set_end_url(self, end_url=""):
+        self.end_url = end_url
+
     def get_end_url(self):
         return self.end_url
+
+    def set_end_num(self, end_num=0)
 
     def get_end_num(self):
         return self.end_num
@@ -55,3 +60,11 @@ class Book(object):
                 'finish': self.get_finish(),
                 'end_url': self.get_end_url(),
                 'end_num': self.get_end_num()}
+
+    def update(self, book):
+        self.set_info(book.get('title'),
+                      book.get('author'),
+                      book.get('url'),
+                      book.get('finish'))
+        self.set_end_url(book.get('end_url'))
+        self.set_end_num(book.get('end_num'))
