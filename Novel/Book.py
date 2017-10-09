@@ -48,7 +48,8 @@ class Book(object):
     def get_end_url(self):
         return self.end_url
 
-    def set_end_num(self, end_num=0)
+    def set_end_num(self, end_num=0):
+        pass
 
     def get_end_num(self):
         return self.end_num

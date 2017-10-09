@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from Book import Book
+from . import Book
+from os import path
 
 import json
-
 
 class Bookstore(object):
 
     def __init__(self):
-        self.file_name = "data/Bookstore.json"
+        this_dir, this_filename = path.split(__file__)
+        self.file_name = path.join(this_dir, "data", "Bookstore.json")
         self.book_list = []
 
     def get_book_list(self):
