@@ -128,7 +128,6 @@ class DataBase(object):
         fields = cursor.fetchone()
         return fields[0] if fields is not None else None
 
-
     def all_dvds(self):
         cursor = self.conn.cursor()
         sql = ("SELECT dvds.title, dvds.year, dvds.duration, "
@@ -138,7 +137,6 @@ class DataBase(object):
         cursor.execute(sql)
         return [(str(fields[0]), fields[1], fields[2], str(fields[3]))
                 for fields in cursor]
-
 
     def all_directors(self):
         cursor = self.conn.cursor()
