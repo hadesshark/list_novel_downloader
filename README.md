@@ -14,3 +14,6 @@
 * Bookstore.json 已 finish 小說不見了
 * 如何讓程式知道這本書已經完結了？
 * 模組測試寫法好像有問題
+* 用 sqlite3 的目的是？
+  * 創建 Bookstore 和 Book 的表
+  * 更方便讀取資料？
