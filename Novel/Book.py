@@ -39,7 +39,8 @@ class Book(object):
         cursor.execute("INSERT INTO Books "
                        "(title, author, url, finish, end_url, end_num) "
                        "VALUES (?, ?, ?, ?, ?, ?)",
-                       (title, author, url, finish, url, 0))
+                       (title, author, url, finish, url, 1))
+        self.conn.commit()
 
     def get_end_url(self):
         pass
@@ -56,9 +57,12 @@ class Book(object):
     def all_books(self):
         cursor = self.conn.cursor()
         sql = ("SELECT Books.title, Books.author, Books.url, Books.finish"
-               " ORDER BY books.title")
+               " ORDER BY Books.title")
+        cursor.execute(sql)
+        return [(str(fields[0]), str(fields[1]), str(fields[2]), str(fields[3]))
+                for fields in cursor]
 
     def all_books_title(self):
         curso = self.conn.cursor()
         sql = ("SELECT Books.id, Books.title"
-                " ORDER BY Books.id")
+               " ORDER BY Books.id")

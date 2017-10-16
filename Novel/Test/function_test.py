@@ -7,3 +7,4 @@ from Novel.Book import Book
 
 book = Book()
 book = Book().set_info("title", "author", "url", "finish")
+# print(book.all_books())
