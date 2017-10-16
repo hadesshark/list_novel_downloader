@@ -242,7 +242,7 @@ def bookstore_new():
 
 def bookstore_update():
     """
-    
+
 
     """
     book_init_data = BookInitData()
@@ -268,6 +268,9 @@ def bookstore_update():
 
             print("\n" + book_init_data.get_title() + ' 更新完畢')
             print("===============================================")
+        else:
+            item = obj
+            temp_obj.append(item)
     bookstore.update(temp_obj)
 
 
