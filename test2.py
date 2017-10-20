@@ -158,9 +158,12 @@ class Bookstore(object):
             self.book_list = json.load(json_file)
         return self.book_list
 
-    def update(self, book_list):
+    def set_book_list(self, book_list):
+        self.book_list = book_list
+
+    def update(self):
         with open(self.file_name, mode="w", encoding="utf-8") as json_file:
-            json.dump(book_list, json_file, indent=2)
+            json.dump(self.book_list, json_file, indent=2)
 
     def book_list_title(self):
         temp_list = self.get_book_list()
@@ -241,10 +244,6 @@ def bookstore_new():
 
 
 def bookstore_update():
-    """
-
-
-    """
     book_init_data = BookInitData()
     bookstore = Bookstore()
     book_list = bookstore.get_book_list()
@@ -257,7 +256,6 @@ def bookstore_update():
         print(book_init_data.get_title() + ' 已在資料庫中')
 
         if book_init_data.get_finish() != "True":
-
             book = Book(book_init_data.get_end_url(), True)
             book.save("txt", "json")
 
@@ -271,7 +269,9 @@ def bookstore_update():
         else:
             item = obj
             temp_obj.append(item)
-    bookstore.update(temp_obj)
+
+    bookstore.set_book_list(temp_obj)
+    bookstore.update()
 
 
 def main():
