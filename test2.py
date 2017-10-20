@@ -243,6 +243,15 @@ def bookstore_new():
         bookstore.add_book(book)
 
 
+def book_update(book_init_data):
+    book = Book(book_init_data.get_end_url(), True)
+    book.save("txt", "json")
+
+    book.set_info(book_init_data.get_info())
+
+    return book.get_info()
+
+
 def bookstore_update():
     book_init_data = BookInitData()
     bookstore = Bookstore()
@@ -255,13 +264,16 @@ def bookstore_update():
         book_init_data.update_data()
         print(book_init_data.get_title() + ' 已在資料庫中')
 
+        "已完結就不再重新下載"
         if book_init_data.get_finish() != "True":
-            book = Book(book_init_data.get_end_url(), True)
-            book.save("txt", "json")
+            # book = Book(book_init_data.get_end_url(), True)
+            # book.save("txt", "json")
+            #
+            # book.set_info(book_init_data.get_info())
+            #
+            # item = book.get_info()
 
-            book.set_info(obj)
-
-            item = book.get_info()
+            item = book_update(book_init_data)
             temp_obj.append(item)
 
             print("\n" + book_init_data.get_title() + ' 更新完畢')
@@ -269,6 +281,9 @@ def bookstore_update():
         else:
             item = obj
             temp_obj.append(item)
+
+            print("\n" + book_init_data.get_title() + ' 不用更新')
+            print("===============================================")
 
     bookstore.set_book_list(temp_obj)
     bookstore.update()
