@@ -252,40 +252,35 @@ def book_update(book_init_data):
     return book.get_info()
 
 
-def bookstore_update():
-    book_init_data = BookInitData()
-    bookstore = Bookstore()
-    book_list = bookstore.get_book_list()
+def get_item(obj, book_init_data):
+    "已完結就不再重新下載"
+    if book_init_data.get_finish() != "True":
+        return book_update(book_init_data)
+    else:
+        return obj
+
+
+def booklist_update(book_list, book_init_data):
 
     temp_obj = []
-
     for obj in book_list:
         book_init_data.set_info(obj)
         book_init_data.update_data()
         print(book_init_data.get_title() + ' 已在資料庫中')
 
-        "已完結就不再重新下載"
-        if book_init_data.get_finish() != "True":
-            # book = Book(book_init_data.get_end_url(), True)
-            # book.save("txt", "json")
-            #
-            # book.set_info(book_init_data.get_info())
-            #
-            # item = book.get_info()
+        item = get_item(obj, book_init_data)
+        temp_obj.append(item)
 
-            item = book_update(book_init_data)
-            temp_obj.append(item)
+        print("\n===============================================")
 
-            print("\n" + book_init_data.get_title() + ' 更新完畢')
-            print("===============================================")
-        else:
-            item = obj
-            temp_obj.append(item)
+    return temp_obj
 
-            print("\n" + book_init_data.get_title() + ' 不用更新')
-            print("===============================================")
 
-    bookstore.set_book_list(temp_obj)
+def bookstore_update():
+    bookstore = Bookstore()
+    book_list = bookstore.get_book_list()
+
+    bookstore.set_book_list(booklist_update(book_list, BookInitData()))
     bookstore.update()
 
 
