@@ -265,9 +265,11 @@ def booklist_update(book_list):
 
     book_init_data = BookInitData()
     new_book_list = []
+
     for book_data in book_list:
 
         # 設定 Book.json
+        # 每一本書都有重新設定 Book.json
         book_init_data.set_info(book_data)
         book_init_data.update_data()
 
