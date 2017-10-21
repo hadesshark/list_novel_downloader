@@ -244,6 +244,7 @@ def bookstore_new():
 
 
 def book_update(book_init_data):
+    # 主要是設定 txt 和 json, 但 BookInitData 要先設定
     book = Book(book_init_data.get_end_url(), True)
     book.save("txt", "json")
 
@@ -252,26 +253,27 @@ def book_update(book_init_data):
     return book.get_info()
 
 
-def get_item(book, book_init_data):
-    "已完結就不再重新下載"
+def get_item(book_init_data):
+    # 已完結就不再重新下載
     if book_init_data.get_finish() != "True":
         return book_update(book_init_data)
     else:
-        return book
+        return book_init_data.get_info()
 
 
 def booklist_update(book_list):
 
     book_init_data = BookInitData()
     new_book_list = []
-    for book in book_list:
+    for book_data in book_list:
+
         # 設定 Book.json
-        book_init_data.set_info(book)
+        book_init_data.set_info(book_data)
         book_init_data.update_data()
 
         print(book_init_data.get_title() + ' 已在資料庫中')
 
-        item = get_item(book, book_init_data)
+        item = get_item(book_init_data)
         new_book_list.append(item)
 
         print("\n===============================================")
