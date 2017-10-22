@@ -19,51 +19,53 @@ def html_string_analysis(url, path):
         return None
 
 
+def get_next_url(url):
+    __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
+
+    temp_url = html_string_analysis(url, __xpath_next_url)
+
+    if temp_url != []:
+        url = temp_url[0]
+    else:
+        url = None
+
+    print(url)
+
+    return url
+
+
 class Contents(object):
     def __init__(self, url=""):
         self.url = url
 
-        self.contents_dict_list = []
+        self.all_chapter = []
 
     def get_contents(self):
-        __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
-
         __xpath_content_list = u"//td[@class='t_f']"
-        __xpath_one_page_contents = u".//text()"
-
-        json_book = []
+        __xpath_one_page_chapter = u".//text()"
 
         while self.url:
-            one_post_num = self.get_one_post_num()
-            one_page_contents = self.get_one_page_contents()
+            chapter_num_list = self.get_chapter_num_list()
+            one_page_chapter = self.get_one_page_chapter()
 
-            for index, element in enumerate(one_post_num):
+            for index, element in enumerate(chapter_num_list):
                 chapter_num = int(element)
-                one_content = one_page_contents[index].xpath(
-                    __xpath_one_page_contents)
+                content_text = one_page_chapter[index].xpath(
+                    __xpath_one_page_chapter)
 
-                content = {"id": chapter_num, "content": one_content}
-                json_book.append(content)
+                chapter = {"id": chapter_num, "text": content_text}
+                self.all_chapter.append(chapter)
 
-            temp_url = html_string_analysis(self.url, __xpath_next_url)
+            self.url = get_next_url(self.url)
 
-            if temp_url != []:
-                self.url = temp_url[0]
-            else:
-                self.url = None
+        return self.all_chapter
 
-            print(self.url)
-
-        self.contents_dict_list = json_book
-
-        return self.contents_dict_list
-
-    def get_one_post_num(self):
+    def get_chapter_num_list(self):
         __xpath_post_num = u"//div[@class='plhin']//a//em//text()"
 
         return html_string_analysis(self.url, __xpath_post_num)
 
-    def get_one_page_contents(self):
+    def get_one_page_chapter(self):
         __xpath_content_list = u"//td[@class='t_f']"
 
         return html_string_analysis(self.url, __xpath_content_list)
