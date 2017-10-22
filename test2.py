@@ -177,7 +177,7 @@ class Bookstore(object):
         book_obj = book.get_info()
         self.book_list = self.get_book_list()
         self.book_list.append(book_obj)
-        self.update(self.book_list)
+        self.update()
 
 
 class Book(BookInitData):
