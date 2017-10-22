@@ -19,66 +19,54 @@ def html_string_analysis(url, path):
         return None
 
 
-def get_one_page_contents(url):
-    __xpath_content_list = u"//td[@class='t_f']"
+class Contents(object):
+    def __init__(self, url=""):
+        self.url = url
 
-    return html_string_analysis(url, __xpath_content_list)
+        self.contents_dict_list = []
 
+    def get_contents(self):
+        __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
 
-def get_one_post_num(url):
-    __xpath_post_num = u"//div[@class='plhin']//a//em//text()"
+        __xpath_content_list = u"//td[@class='t_f']"
+        __xpath_one_page_contents = u".//text()"
 
-    return html_string_analysis(url, __xpath_post_num)
+        json_book = []
 
-def get_json_contents(url):
-    __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
+        while self.url:
+            one_post_num = self.get_one_post_num()
+            one_page_contents = self.get_one_page_contents()
 
-    __xpath_content_list = u"//td[@class='t_f']"
-    __xpath_one_page_contents = u".//text()"
+            for index, element in enumerate(one_post_num):
+                chapter_num = int(element)
+                one_content = one_page_contents[index].xpath(
+                    __xpath_one_page_contents)
 
-    json_book = []
+                content = {"id": chapter_num, "content": one_content}
+                json_book.append(content)
 
-    while url:
-        one_post_num = get_one_post_num(url)
-        one_page_contents = get_one_page_contents(url)
+            temp_url = html_string_analysis(self.url, __xpath_next_url)
 
-        for index, element in enumerate(one_post_num):
-            chapter_num = int(element)
-            one_content = one_page_contents[index].xpath(
-                __xpath_one_page_contents)
+            if temp_url != []:
+                self.url = temp_url[0]
+            else:
+                self.url = None
 
-            content = {"id": chapter_num, "content": one_content}
-            json_book.append(content)
+            print(self.url)
 
-        temp_url = html_string_analysis(url, __xpath_next_url)
+        self.contents_dict_list = json_book
 
-        if temp_url != []:
-            url = temp_url[0]
-        else:
-            url = None
+        return self.contents_dict_list
 
-        print(url)
+    def get_one_post_num(self):
+        __xpath_post_num = u"//div[@class='plhin']//a//em//text()"
 
-    return json_book
+        return html_string_analysis(self.url, __xpath_post_num)
 
+    def get_one_page_contents(self):
+        __xpath_content_list = u"//td[@class='t_f']"
 
-def load_info():
-    with open("Book.json", encoding="utf-8") as json_file:
-        json_data = json.load(json_file)
-
-    title = json_data.get("title")
-    author = json_data.get("author")
-    url = json_data.get("url")
-    finish = json_data.get("finish")
-
-    return (title, author, url, finish)
-
-
-def book_save_json(contents, title):
-    DIR_JSON_FOLDER = os.path.join("text", title + '.json')
-
-    with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
-        json.dump(contents, f, indent=2)
+        return html_string_analysis(self.url, __xpath_content_list)
 
 
 class JsonBook(object):
@@ -92,20 +80,18 @@ class JsonBook(object):
         self.url = json_data.get("url")
         self.finish = json_data.get("finish")
 
-    def save(self, contents):
+        self.contents = Contents(self.url)
+
+    def save(self):
         DIR_JSON_FOLDER = os.path.join("text", self.title + '.json')
 
         with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
-            json.dump(contents, f, indent=2)
+            json.dump(self.contents.get_contents(), f, indent=2)
 
 
 def new_book():
-    title, author, url, finish = load_info()
-
-    # book_save_json(get_json_contents(url), title)
-
     jsonbook = JsonBook()
-    jsonbook.save(get_json_contents(url))
+    jsonbook.save()
 
 
 def main():
