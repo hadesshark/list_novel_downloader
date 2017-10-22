@@ -81,10 +81,31 @@ def book_save_json(contents, title):
         json.dump(contents, f, indent=2)
 
 
+class JsonBook(object):
+
+    def __init__(self):
+        with open("Book.json", encoding="utf-8") as json_file:
+            json_data = json.load(json_file)
+
+        self.title = json_data.get("title")
+        self.author = json_data.get("author")
+        self.url = json_data.get("url")
+        self.finish = json_data.get("finish")
+
+    def save(self, contents):
+        DIR_JSON_FOLDER = os.path.join("text", self.title + '.json')
+
+        with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
+            json.dump(contents, f, indent=2)
+
+
 def new_book():
     title, author, url, finish = load_info()
 
-    book_save_json(get_json_contents(url), title)
+    # book_save_json(get_json_contents(url), title)
+
+    jsonbook = JsonBook()
+    jsonbook.save(get_json_contents(url))
 
 
 def main():
