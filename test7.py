@@ -24,20 +24,6 @@ class Online(object):
         except:
             return None
 
-    def get_next_url(self):
-        __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
-
-        temp_url = self.analysis(__xpath_next_url)
-
-        if temp_url != []:
-            self.url = temp_url[0]
-        else:
-            self.url = None
-
-        print(self.url)
-
-        return self.url
-
     def next_url(self):
         __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
 
@@ -63,12 +49,40 @@ class Online(object):
     def get_url(self):
         return self.url
 
+    def set_url(self, url=""):
+        self.url = url
+
+
+class End(object):
+
+    def __init__(self):
+        self.chapter_num = 0
+        self.url = ""
+
+    def set_url(self, url=""):
+        self.url = url
+
+    def set_chapter_num(self, chapter_num=0):
+        self.chapter_num = chapter_num
+
+    def save_to_book_json(self):
+        with open("Book.json", encoding="utf-8") as json_file:
+            json_data = json.load(json_file)
+
+        json_data["end_url"] = self.url
+        json_data["end_chapter_num'"] = self.chapter_num
+
+        with open("Book.json", mode="w", encoding="utf-8") as f:
+            json.dump(json_data, f, indent=2)
+
 
 class Contents(object):
     def __init__(self):
         self.Data = Online()
 
         self.all_chapter = []
+
+        self.end = End()
 
     def get_contents(self):
         __xpath_content_list = u"//td[@class='t_f']"
@@ -86,9 +100,17 @@ class Contents(object):
                 chapter = {"id": chapter_num, "text": content_text}
                 self.all_chapter.append(chapter)
 
+            self.end.set_chapter_num(chapter_num_list[-1])
+            self.end.set_url(self.Data.get_url())
+            self.end.save_to_book_json()
+
             self.Data.next_url()
 
         return self.all_chapter
+
+    def update(self):
+        end_url = Json().get_end_url()
+        self.Data.set_url(end_url)
 
     def get_chapter_num_list(self):
         __xpath_post_num = u"//div[@class='plhin']//a//em//text()"
@@ -103,26 +125,27 @@ class Contents(object):
 
 class Json(object):
 
-    def __init__(self):
-        with open("Book.json", encoding="utf-8") as json_file:
-            json_data = json.load(json_file)
-
-        self.title = json_data.get("title")
-        self.author = json_data.get("author")
-        self.url = json_data.get("url")
-        self.finish = json_data.get("finish")
+    def __init__(self, file_name="Book.json"):
+        with open(file_name, encoding="utf-8") as json_file:
+            self.json_data = json.load(json_file)
 
     def get_title(self):
-        return self.title
+        return self.json_data.get("title")
 
     def get_autor(self):
-        return self.author
+        return self.json_data.get("author")
 
     def get_url(self):
-        return self.url
+        return self.json_data.get("url")
 
     def get_finish(self):
-        return self.finish
+        return self.json_data.get("finish")
+
+    def get_contents(self):
+        return self.json_data
+
+    def get_end_url(self):
+        return self.json_data.get("end_url")
 
 
 class JsonBook(object):
@@ -139,14 +162,40 @@ class JsonBook(object):
         with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
             json.dump(self.contents.get_contents(), f, indent=2)
 
+    def update(self):
+        DIR_JSON_FOLDER = os.path.join("text", self.title + '.json')
+
+        if os.path.exists(DIR_JSON_FOLDER):
+            print("檔案存在")
+
+            # self.contents = Json(DIR_JSON_FOLDER).get_contents()
+
+            """
+            重點
+            * 之前的 contents
+            * 最後的 url
+            * 判斷是否有抓過
+            * 在已有的 contents 後加入 content
+            """
+
+        else:
+            print("檔案不存在")
+            self.save()
+
 
 def new_book():
     jsonbook = JsonBook()
     jsonbook.save()
 
 
+def update_book():
+    jsonbook = JsonBook()
+    jsonbook.update()
+
+
 def main():
     new_book()
+    # update_book()
 
 
 if __name__ == '__main__':
