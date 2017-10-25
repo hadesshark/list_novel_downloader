@@ -9,7 +9,7 @@ import json
 from JsonInit import JsonFile as JsonFile
 
 
-class DownloadType(self):
+class DownloadType(object):
     pass
 
 
@@ -186,11 +186,16 @@ class Bookstore(object):
 
 class Book(BookInitData):
 
-    def __init__(self, url="", update_flag=False):
+    def __init__(self, update_flag=False):
         super().__init__()
         self.title = self.get_title()
 
-        self.content = Contents(url, update_flag)
+        if update_flag:
+            temp_url = super().get_end_url()
+        else:
+            temp_url = self.get_url()
+
+        self.content = Contents(temp_url, update_flag)
         self.content_obj = self.content.get_contents()
 
         self.contents_list = []
@@ -235,21 +240,21 @@ def bookstore_new():
     book = Book()
     bookstore = Bookstore()
     if not bookstore.check_have(book):
+        book.save("txt", "json")
         bookstore.add_book(book)
     """
     book_init_data = BookInitData()
     bookstore = Bookstore()
     if bookstore.not_have_book(book_init_data):
 
-        book = Book(book_init_data.get_url())
+        book = Book()
         book.save("txt", "json")
-
         bookstore.add_book(book)
 
 
 def book_update(book_init_data):
     # 主要是設定 txt 和 json, 但 BookInitData 要先設定
-    book = Book(book_init_data.get_end_url(), True)
+    book = Book(True)
     book.save("txt", "json")
 
     book.set_info(book_init_data.get_info())
