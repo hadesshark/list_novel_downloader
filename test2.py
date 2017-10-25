@@ -9,6 +9,10 @@ import json
 from JsonInit import JsonFile as JsonFile
 
 
+class DownloadType(self):
+    pass
+
+
 class Contents(object):
     __xpath_post_num = u"//div[@class='plhin']//a//em//text()"
     __xpath_all_num = u"//div[@class='pg']/a[@class='last']//text()"
@@ -33,7 +37,7 @@ class Contents(object):
 
     def get_contents(self):
         if not self.update_flag:
-            self.temp_list = self.insert_list()
+            self.temp_list = self.get_chapter_list()
         else:
             self.temp_list = self.update()
         return self.temp_list
@@ -54,7 +58,7 @@ class Contents(object):
             one_content = content_list[index].xpath(u".//text()")
             yield {"id": chapter_num, "content": one_content}
 
-    def insert_list(self):
+    def get_chapter_list(self):
         temp_list = []
         while self.obj_url.have_url():
             self.end_url = self.obj_url.get_url()
