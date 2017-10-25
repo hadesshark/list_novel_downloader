@@ -15,6 +15,14 @@ class OnlineData(object):
         self.title = self.json_data.get("title")
         self.url = self.json_data.get("url")
 
+        temp_url = self.json_data.get("end_url")
+        self.end_url = temp_url if temp_url != None else ""
+
+        temp_num = self.json_data.get("end_num")
+        self.end_num = temp_num if temp_url != None else 0
+
+        self.flag_update = False
+
     def get_title(self):
         return self.title
 
@@ -42,6 +50,9 @@ class OnlineData(object):
         except:
             return None
 
+    def get_end_num(self):
+        return self.end_num
+
     def __get_chapter_num_list(self):
         __xpath_post_num = u"//div[@class='plhin']//a//em//text()"
 
@@ -49,27 +60,46 @@ class OnlineData(object):
 
     def __get_chapter_text_list(self):
         __xpath_content_list = u"//td[@class='t_f']"
+        __xpath_one_page_chapter = u".//text()"
 
-        return self.__analysis(__xpath_content_list)
+        chapter_list = []
+        for chapter in self.__analysis(__xpath_content_list):
+            chapter_list.append(chapter.xpath(__xpath_one_page_chapter))
+        return chapter_list
 
     def set_url(self, url=""):
         self.url = url
-
-    def get_text(self):
-        return self.__get_chapter_num_list(), self.__get_chapter_text_list()
 
     def set_end_info(self, end_num=0):
         with open("Book.json", encoding="utf-8") as json_file:
             json_data = json.load(json_file)
 
         json_data["end_url"] = self.url
-        json_data["end_chapter_num'"] = end_num
+        json_data["end_num"] = int(end_num)
 
         with open("Book.json", mode="w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=2)
 
     def have_chapter(self):
+        if self.get_end_url() and not self.flag_update:
+            self.url = self.end_url
+            self.flag_update = True
+
         return self.url
+
+    def get_end_url(self):
+        return self.end_url
+
+    def get_chapter_info(self):
+        return list(zip(self.__get_chapter_num_list(), self.__get_chapter_text_list()))
+
+    def save_file_dir(self):
+        DIR_JSON_FOLDER = os.path.join("text", self.get_title() + '.json')
+
+        return DIR_JSON_FOLDER
+
+    def get_book_size(self):
+        return os.path.getsize(self.save_file_dir())
 
 
 class Content(object):
@@ -81,24 +111,32 @@ class Content(object):
     def get_contents(self):
         __xpath_one_page_chapter = u".//text()"
 
+        self.exists_content()
+
+        end_num = self.data.get_end_num()
+
         while self.data.have_chapter():
-            chapter_num_list, chapter_text_list = self.data.get_text()
+            for index, (num, text) in enumerate(self.data.get_chapter_info()):
 
-            for index, element in enumerate(chapter_num_list):
-                chapter_num = int(element)
-                contents_text = chapter_text_list[index].xpath(
-                    __xpath_one_page_chapter)
+                if int(num) > end_num:
+                    chapter = {"id": num, "text": text}
+                    self.chapters.append(chapter)
 
-                chapter = {"id": chapter_num, "text": contents_text}
-                self.chapters.append(chapter)
-
-            self.data.set_end_info(chapter_num_list[-1])
+                self.data.set_end_info(num)
 
             print(self.data.have_chapter())
 
             self.data.next_url()
 
         return self.chapters
+
+    def exists_content(self):
+        try:
+            with open(self.data.save_file_dir(), encoding="utf-8") as json_file:
+                self.contents = json.load(json_file)
+        except:
+            self.contents = []
+
 
 
 class Book(object):
@@ -126,6 +164,10 @@ def update_book():
 def main():
     new_book()
     # update_book()
+
+    # data = OnlineData()
+    # print(data.get_end_num())
+    # print(data.get_end_url())
 
 
 if __name__ == '__main__':
