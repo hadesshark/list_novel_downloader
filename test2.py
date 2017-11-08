@@ -18,6 +18,63 @@ class Contents(object):
     __xpath_all_num = u"//div[@class='pg']/a[@class='last']//text()"
     __xpath_content_list = u"//td[@class='t_f']"
 
+    """
+    def __init__(self, update_flag=False):
+        self.array_chapter = []
+
+    def get_contents(self):
+        if not self.update_flag:
+            self.array_chapter = self.get_new_contents()
+        else:
+            self.array_chapter = self.update_contents()
+
+    def get_new_contents(self):
+        array_chapter = []
+        while self.have_next_contents():
+            # self.end_url = self.obj_url.get_url() !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            # self.obj_url.show_now_url() 感覺是 test 要做的事情
+
+            for chapter in (self.get_all_chapter()):
+                array_chapter.append(chapter)
+
+            self.get_next_contents()
+        return array_chapter
+
+    def have_next_contents(self):
+        pass
+
+    def get_all_chapter(self):
+        pass
+
+    def get_next_contets(self):
+        pass
+
+    def update_contents(self):
+        self.set_contents()
+        temp_list = self.temp_list
+        while self.obj_url.have_url():
+            self.end_url = self.obj_url.get_url()
+            self.obj_url.show_now_url()
+
+            for item in (self.generator_item()):
+                if not item in temp_list:
+                    sys.stdout.write("\n{0} 章更新中...".format(item['id']))
+                    temp_list.append(item)
+                else:
+                    sys.stdout.write("\n{0} 章已有".format(item['id']))
+            self.obj_url.set_url(self.obj_url.get_next_url())
+        return temp_list
+
+    def set_contents(self):
+        DIR_JSON_FOLDER = os.path.join(
+            "bookstore_json", JsonFile().__str__() + '.json')
+        with open(DIR_JSON_FOLDER, encoding="utf-8") as json_file:
+            contents = json.load(json_file)
+        self.temp_list = contents
+
+
+    """
+
     def __init__(self, url="", update_flag=False):
         self.obj_url = URL(url)
         self.content = ''
@@ -55,6 +112,8 @@ class Contents(object):
         content_list = self.page_content_list()
         for index, element in enumerate(self.get_post_num()):
             chapter_num = int(element)
+            print(len(self.get_post_num()))
+            print(len(content_list))
             one_content = content_list[index].xpath(u".//text()")
             yield {"id": chapter_num, "content": one_content}
 
@@ -215,10 +274,10 @@ class Book(BookInitData):
 
         self.title = self.book_data.get_title()
         self.contents = Contents(update_flag)
-        self.array_content = []
+        self.array_chapter = []
 
     def save(self, *filetype):
-        self.array_content = self.content.get_contents()
+        self.array_chapter = self.content.get_contents()
 
         if "txt" in filetype:
             self.save_txt()
@@ -230,7 +289,7 @@ class Book(BookInitData):
             "bookstore_json", self.book_data.get_save_title() + '.json')
 
         with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
-            json.dump(self.array_content, f, indent=2)
+            json.dump(self.array_chapter, f, indent=2)
 
     def save_txt(self):
         DIR_TXT_FOLDER = os.path.join(
@@ -238,7 +297,7 @@ class Book(BookInitData):
 
         contents = ''
         with open(DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
-            for item in self.array_content:
+            for item in self.array_chapter:
                 contents += ''.join(item["content"])
             txt_file.write(contents)
     """

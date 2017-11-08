@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 
-
 class JsonFile(object):
     def __init__(self):
         with open("Book.json", encoding="utf-8") as json_file:
@@ -61,6 +60,6 @@ class JsonFile(object):
         'end_url': self.end_url}
 
     def __del__(self):
-        if self.title != self.json_data.get('title'):
+        if self.get_title() != self.json_data.get("title"):
             with open("Book.json", mode="w", encoding="utf-8") as json_file:
                 json.dump(self.data(), json_file)
