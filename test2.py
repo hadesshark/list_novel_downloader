@@ -76,6 +76,13 @@ class Contents(object):
     """
 
     def __init__(self, url="", update_flag=False):
+        self.book_data = BookData()
+
+        if update_flag:
+            temp_url = self.book_data.get_end_url()
+        else:
+            temp_url = self.book_data.get_url()
+
         self.obj_url = URL(url)
         self.content = ''
         self.temp_list = []
@@ -112,8 +119,6 @@ class Contents(object):
         content_list = self.page_content_list()
         for index, element in enumerate(self.get_post_num()):
             chapter_num = int(element)
-            print(len(self.get_post_num()))
-            print(len(content_list))
             one_content = content_list[index].xpath(u".//text()")
             yield {"id": chapter_num, "content": one_content}
 
@@ -266,7 +271,7 @@ class Bookstore(object):
         self.update()
 
 
-class Book(BookInitData):
+class Book(object):
     """
     def __init__(self, update_flag=False):
 
@@ -307,17 +312,20 @@ class Book(BookInitData):
 
         self.book_data = BookData()
 
-        self.title = self.get_title()
+        self.title = self.book_data.get_title()
 
         if update_flag:
-            temp_url = super().get_end_url()
+            temp_url = self.book_data.get_end_url()
         else:
-            temp_url = self.get_url()
+            temp_url = self.book_data.get_url()
 
         self.content = Contents(temp_url, update_flag)
         self.content_obj = []
 
-        self.set_end_url(self.get_end_url())
+        self.book_data.set_end_url(self.get_end_url())
+
+    def get_title(self):
+        return self.title
 
     def get_end_url(self):
         return self.content.get_end_url()
@@ -395,15 +403,6 @@ def booklist_update(book_list):
         new_book_list.append(item)
 
         print("\n===============================================")
-
-        # book = Book()
-        # book.set_info(book_data)
-        # book.update_data()
-        #
-        # print(book.get_title() + ' 已在資料庫中')
-        #
-        # item = get_item(book)
-        # new_book_list.append(item)
 
     return new_book_list
 
