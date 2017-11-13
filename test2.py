@@ -18,15 +18,16 @@ class Contents(object):
     __xpath_all_num = u"//div[@class='pg']/a[@class='last']//text()"
     __xpath_content_list = u"//td[@class='t_f']"
 
-    def __init__(self, url="", update_flag=False):
+    def __init__(self, update_flag=False):
         self.book_data = BookData()
 
         if update_flag:
-            temp_url = self.book_data.get_end_url()
+            temp_url = self.book_data.get_end_url
+()
         else:
             temp_url = self.book_data.get_url()
 
-        self.obj_url = URL(url)
+        self.obj_url = URL(temp_url)
         self.content = ''
         self.temp_list = []
         self.update_flag = update_flag
@@ -190,6 +191,8 @@ class Bookstore(object):
         self.book_list.append(book_obj)
         self.update()
 
+        book.save("txt", "json")
+
 
 class Book(BookData):
 
@@ -200,12 +203,7 @@ class Book(BookData):
 
         self.title = self.book_data.get_title()
 
-        if update_flag:
-            temp_url = self.book_data.get_end_url()
-        else:
-            temp_url = self.book_data.get_url()
-
-        self.content = Contents(temp_url, update_flag)
+        self.content = Contents(update_flag)
         self.content_obj = []
 
         self.book_data.set_end_url(self.get_end_url())
@@ -249,7 +247,7 @@ def bookstore_new():
     book = Book()
     bookstore = Bookstore()
     if bookstore.not_have_book(book):
-        book.save("txt", "json")
+        # book.save("txt", "json")
         bookstore.add_book(book)
 
 
