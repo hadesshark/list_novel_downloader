@@ -22,8 +22,7 @@ class Contents(object):
         self.book_data = BookData()
 
         if update_flag:
-            temp_url = self.book_data.get_end_url
-()
+            temp_url = self.book_data.get_end_url()
         else:
             temp_url = self.book_data.get_url()
 
@@ -33,7 +32,7 @@ class Contents(object):
         self.update_flag = update_flag
         self.end_url = ''
 
-    def get_end_url(self):
+    def get_end_url(self):  # 也不是它要做的內容
         return self.end_url
 
     def set_contents(self):
@@ -199,22 +198,22 @@ class Book(BookData):
     def __init__(self, update_flag=False):
         super().__init__()
 
-        self.book_data = BookData()
+        self.book_data = BookData() # 不該出現
 
-        self.title = self.book_data.get_title()
+        self.title = self.book_data.get_title() # 也只有在判斷是否在書庫有使用
 
         self.content = Contents(update_flag)
         self.content_obj = []
 
-        self.book_data.set_end_url(self.get_end_url())
+        self.book_data.set_end_url(self.get_end_url()) # 要刪掉
 
     def get_title(self):
         return self.title
 
-    def get_end_url(self):
+    def get_end_url(self): # 要刪掉
         return self.content.get_end_url()
 
-    def save(self, *filetype):
+    def save(self, *filetype): # 不是它的功能
         self.content_obj = self.content.get_contents()
 
         if "txt" in filetype:
@@ -222,17 +221,17 @@ class Book(BookData):
         if "json" in filetype:
             self.save_json()
 
-    def get_save_title(self):
+    def get_save_title(self): # 不是它的功能
         return JsonFile().__str__()
 
-    def save_json(self):
+    def save_json(self): # 不是它的功能
         DIR_JSON_FOLDER = os.path.join(
             "bookstore_json", self.get_save_title() + '.json')
 
         with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
             json.dump(self.content_obj, f, indent=2)
 
-    def save_txt(self):
+    def save_txt(self): # 不是它的功能
         DIR_TXT_FOLDER = os.path.join(
             "bookstore_txt", self.get_save_title() + '.txt')
 
@@ -291,6 +290,7 @@ def booklist_update(book_list):
     return new_book_list
 
 
+# 名存實亡
 def bookstore_update():
     bookstore = Bookstore()
     book_list = bookstore.get_book_list()
