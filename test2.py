@@ -42,8 +42,9 @@ class Contents(object):
             contents = json.load(json_file)
         self.temp_list = contents
 
+    # 下載
     def get_contents(self):
-        if not self.update_flag:
+        if not self.update_flag: # 初次下載
             self.temp_list = self.get_chapter_list()
         else:
             self.temp_list = self.update()
@@ -185,12 +186,14 @@ class Bookstore(object):
         return False if book.get_title() in self.book_list_title() else True
 
     def add_book(self, book):
+        book.save("txt", "json")
+
         book_obj = book.get_info()
         self.book_list = self.get_book_list()
         self.book_list.append(book_obj)
         self.update()
 
-        book.save("txt", "json")
+
 
 
 class Book(BookData):
@@ -205,7 +208,9 @@ class Book(BookData):
         self.content = Contents(update_flag)
         self.content_obj = []
 
+        # 不行
         self.book_data.set_end_url(self.get_end_url()) # 要刪掉
+        # self.book_data.update_data()
 
     def get_title(self):
         return self.title
@@ -290,7 +295,6 @@ def booklist_update(book_list):
     return new_book_list
 
 
-# 名存實亡
 def bookstore_update():
     bookstore = Bookstore()
     book_list = bookstore.get_book_list()
