@@ -44,7 +44,7 @@ class Contents(object):
 
     # 下載
     def get_contents(self):
-        if not self.update_flag: # 初次下載
+        if not self.update_flag:  # 初次下載
             self.temp_list = self.get_chapter_list()
         else:
             self.temp_list = self.update()
@@ -188,12 +188,54 @@ class Bookstore(object):
     def add_book(self, book):
         book.save("txt", "json")
 
-        book_obj = book.get_info()
+        self._add_to_list(book)
+
+    def _add_to_list(self, book):
         self.book_list = self.get_book_list()
-        self.book_list.append(book_obj)
+        self.book_list.append(book.get_info())
         self.update()
 
+    def book_list_update(self):
+        book_init_data = BookData()
+        new_book_list = []
 
+        book_list = self.get_book_list()
+
+        for book_data in book_list:
+            # 設定 Book.json
+            # 每一本書都要重新設定 Book.json
+            book_init_data.set_info(book_data)
+            book_init_data.update_data()
+
+            print(book_init_data.get_title() + ' 已在資料庫中')
+
+            # 要修改
+            # item = get_item(book_init_data)
+            item = self._get_item(book_init_data)
+            new_book_list.append(item)
+
+            print("\n===============================================")
+
+        # return new_book_list
+        self.set_book_list(new_book_list)
+        self.update()
+
+    def _get_item(self, book_init_data):
+        # 已完結就不再重新下載
+        if book_init_data.get_finish() != "True":
+            # return book_update(book_init_data)
+            return self._book_update(book_init_data)
+        else:
+            return book_init_data.get_info()
+
+    def _book_update(self, book_init_data):
+        # 主要是設定 txt 和 json, 但 BookData 要先設定
+        book = Book(True)
+        book.save("txt", "json")
+
+        book.set_info(book_init_data.get_info())
+
+        return book.get_info()
 
 
 class Book(BookData):
@@ -201,24 +243,23 @@ class Book(BookData):
     def __init__(self, update_flag=False):
         super().__init__()
 
-        self.book_data = BookData() # 不該出現
+        self.book_data = BookData()  # 不該出現
 
-        self.title = self.book_data.get_title() # 也只有在判斷是否在書庫有使用
+        self.title = self.book_data.get_title()  # 也只有在判斷是否在書庫有使用
 
         self.content = Contents(update_flag)
         self.content_obj = []
 
         # 不行
-        self.book_data.set_end_url(self.get_end_url()) # 要刪掉
-        # self.book_data.update_data()
+        self.book_data.set_end_url(self.get_end_url())  # 要刪掉
 
     def get_title(self):
         return self.title
 
-    def get_end_url(self): # 要刪掉
+    def get_end_url(self):  # 要刪掉
         return self.content.get_end_url()
 
-    def save(self, *filetype): # 不是它的功能
+    def save(self, *filetype):  # 不是它的功能
         self.content_obj = self.content.get_contents()
 
         if "txt" in filetype:
@@ -226,17 +267,17 @@ class Book(BookData):
         if "json" in filetype:
             self.save_json()
 
-    def get_save_title(self): # 不是它的功能
+    def get_save_title(self):  # 不是它的功能
         return JsonFile().__str__()
 
-    def save_json(self): # 不是它的功能
+    def save_json(self):  # 不是它的功能
         DIR_JSON_FOLDER = os.path.join(
             "bookstore_json", self.get_save_title() + '.json')
 
         with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
             json.dump(self.content_obj, f, indent=2)
 
-    def save_txt(self): # 不是它的功能
+    def save_txt(self):  # 不是它的功能
         DIR_TXT_FOLDER = os.path.join(
             "bookstore_txt", self.get_save_title() + '.txt')
 
@@ -251,7 +292,6 @@ def bookstore_new():
     book = Book()
     bookstore = Bookstore()
     if bookstore.not_have_book(book):
-        # book.save("txt", "json")
         bookstore.add_book(book)
 
 
@@ -265,42 +305,9 @@ def book_update(book_init_data):
     return book.get_info()
 
 
-def get_item(book_init_data):
-    # 已完結就不再重新下載
-    if book_init_data.get_finish() != "True":
-        return book_update(book_init_data)
-    else:
-        return book_init_data.get_info()
-
-
-def booklist_update(book_list):
-
-    book_init_data = BookData()
-    new_book_list = []
-
-    for book_data in book_list:
-
-        # 設定 Book.json
-        # 每一本書都要重新設定 Book.json
-        book_init_data.set_info(book_data)
-        book_init_data.update_data()
-
-        print(book_init_data.get_title() + ' 已在資料庫中')
-
-        item = get_item(book_init_data)
-        new_book_list.append(item)
-
-        print("\n===============================================")
-
-    return new_book_list
-
-
 def bookstore_update():
     bookstore = Bookstore()
-    book_list = bookstore.get_book_list()
-
-    bookstore.set_book_list(booklist_update(book_list))
-    bookstore.update()
+    bookstore.book_list_update()
 
 
 def main():
