@@ -38,7 +38,31 @@ class Contents(object):
             "bookstore_json", JsonFile().__str__() + '.json')
         with open(DIR_JSON_FOLDER, encoding="utf-8") as json_file:
             contents = json.load(json_file)
+
+        contents = self._remove_repeat_item(contents)
+
         self.temp_list = contents
+
+    def _remove_repeat_item(self, contents):
+        print(len(contents))
+
+        key_list = []
+        new_contents = []
+        for item in contents:
+            key = item.get("id")
+            if key not in key_list:
+                key_list.append(key)
+                new_contents.append(item)
+
+        print(len(new_contents))
+
+        DIR_JSON_FOLDER = os.path.join(
+            "bookstore_json", JsonFile().__str__() + '.json')
+
+        with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
+            json.dump(new_contents, f, indent=2)
+
+        return new_contents
 
     # 下載
     def get_contents(self):
@@ -197,19 +221,24 @@ class Bookstore(object):
         with open(self.file_name, mode="w", encoding="utf-8") as json_file:
             json.dump(self.book_list, json_file, indent=2)
 
+    def _finish_and_nofinish_list(self):
+        finish_list = []
+        no_finish_list = []
+        for item in self.get_book_list():
+            if item.get('finish') == "True":
+                finish_list.append(item)
+            else:
+                no_finish_list.append(item)
+        return finish_list, no_finish_list
+
     # 這個以下的函數都要重新處理
     def no_finish_book_update(self):
         book_init_data = BookData()
         new_book_list = []
 
-        book_list = self.get_book_list()
-
         no_finish_book_list = []
-        for item in book_list:
-            if item.get('finish') == "True":
-                new_book_list.append(item)
-            else:
-                no_finish_book_list.append(item)
+
+        new_book_list, no_finish_book_list = self._finish_and_nofinish_list()
 
         for book_data in no_finish_book_list:  # 只設定 no finish 部分
 
@@ -224,7 +253,6 @@ class Bookstore(object):
 
             print("\n===============================================")
 
-        # return new_book_list
         self.set_book_list(new_book_list)
         self.update()
 
@@ -243,6 +271,10 @@ class Bookstore(object):
         book.set_info(book_init_data.get_info())
 
         return book.get_info()
+
+    def __del__(self):
+        with open(self.file_name, mode="w", encoding="utf-8") as json_file:
+            json.dump(self.book_list, json_file, indent=2)
 
 
 class Book(BookData):
@@ -302,6 +334,7 @@ class Book(BookData):
 def bookstore_new():
     book = Book()
     bookstore = Bookstore()
+    # if book not in bookstore.book_list:  # 這樣比較直覺
     if bookstore.not_have_book(book):
         bookstore.add_book(book)
 
@@ -313,9 +346,10 @@ def bookstore_update():
 
 
 def main():
-    bookstore_new()
+    # bookstore_new()
     # bookstore_update()
 
+    pass
 
 if __name__ == '__main__':
     main()
