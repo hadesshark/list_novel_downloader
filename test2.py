@@ -102,7 +102,12 @@ class Contents(object):
                 temp_list.append(item)
 
             self.obj_url.set_url(self.obj_url.get_next_url())  # 這個方法最怪
+            self.book_data.set_end_url(self.end_url)
         return temp_list
+
+    def __del__(self):
+        with open("Book.json", mode="w", encoding="utf-8") as json_file:
+            json.dump(self.get_info(), json_file, indent=2)
 
     def update(self):
         self.set_contents()
@@ -294,14 +299,14 @@ class Book(BookData):
 
         # 這寫法怪怪的
         self.content = Contents(update_flag)
-        self.list_chapter = []
+        self.content_obj = []
 
     def get_title(self):  # 要刪掉
         return self.book_data.get_title()
 
     # 主要處理 content 存放問題
     def save(self, *filetype):  # 不是它的功能
-        self.list_chapter = self.content.get_contents()
+        self.content_obj = self.content.get_contents()
 
         if "txt" in filetype:
             self.save_txt()
@@ -316,7 +321,7 @@ class Book(BookData):
             "bookstore_json", self._get_save_title() + '.json')
 
         with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
-            json.dump(self.list_chapter, f, indent=2)
+            json.dump(self.content_obj, f, indent=2)
 
     def save_txt(self):  # 不是它的功能
         DIR_TXT_FOLDER = os.path.join(
@@ -324,7 +329,7 @@ class Book(BookData):
 
         contents = ''
         with open(DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
-            for item in self.list_chapter:
+            for item in self.content_obj:
                 contents += ''.join(item["content"])
             txt_file.write(contents)
 
