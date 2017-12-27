@@ -106,8 +106,9 @@ class Contents(object):
         return temp_list
 
     def __del__(self):
+        print(self.book_data.get_info())
         with open("Book.json", mode="w", encoding="utf-8") as json_file:
-            json.dump(self.get_info(), json_file, indent=2)
+            json.dump(self.book_data.get_info(), json_file, indent=2)
 
     def update(self):
         self.set_contents()
