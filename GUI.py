@@ -53,6 +53,18 @@ class JsonFile(JsonFile):
         self.set_author(author)
         self.set_finish(finish)
 
+    def data(self):
+        return {
+        'title': self.get_title(),
+        'url': self.get_url(),
+        'author': self.get_author(),
+        'finish': self.get_finish(),
+        'end_url': ""}
+
+    def __del__(self):
+        super().__del__()
+        
+
 
 class Data(object):
     def __init__(self, form, name, author, url, finish):
