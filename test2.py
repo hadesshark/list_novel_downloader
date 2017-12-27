@@ -24,7 +24,7 @@ class Contents(object):
             temp_url = self.book_data.get_url()
         self.obj_url = URL(temp_url)
 
-        self.content = ''
+        self.content = ''  # 沒用到
 
         self.temp_list = []
         self.update_flag = update_flag
@@ -184,6 +184,10 @@ class BookData(JsonFile):
         with open("Book.json", mode="w", encoding="utf-8") as json_file:
             json.dump(self.get_info(), json_file, indent=2)
 
+    def __del__(self):
+        with open("Book.json", mode="w", encoding="utf-8") as json_file:
+            json.dump(self.get_info(), json_file, indent=2)
+
 
 class Bookstore(object):
 
@@ -290,19 +294,14 @@ class Book(BookData):
 
         # 這寫法怪怪的
         self.content = Contents(update_flag)
-        self.content_obj = []
-
-        self.book_data.set_end_url(self.get_end_url())  # 要刪掉
+        self.list_chapter = []
 
     def get_title(self):  # 要刪掉
         return self.book_data.get_title()
 
-    def get_end_url(self):  # 要刪掉
-        return self.content.get_end_url()
-
     # 主要處理 content 存放問題
     def save(self, *filetype):  # 不是它的功能
-        self.content_obj = self.content.get_contents()
+        self.list_chapter = self.content.get_contents()
 
         if "txt" in filetype:
             self.save_txt()
@@ -317,7 +316,7 @@ class Book(BookData):
             "bookstore_json", self._get_save_title() + '.json')
 
         with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
-            json.dump(self.content_obj, f, indent=2)
+            json.dump(self.list_chapter, f, indent=2)
 
     def save_txt(self):  # 不是它的功能
         DIR_TXT_FOLDER = os.path.join(
@@ -325,7 +324,7 @@ class Book(BookData):
 
         contents = ''
         with open(DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
-            for item in self.content_obj:
+            for item in self.list_chapter:
                 contents += ''.join(item["content"])
             txt_file.write(contents)
 
@@ -334,7 +333,6 @@ class Book(BookData):
 def bookstore_new():
     book = Book()
     bookstore = Bookstore()
-    # if book not in bookstore.book_list:  # 這樣比較直覺
     if bookstore.not_have_book(book):
         bookstore.add_book(book)
 
@@ -350,6 +348,7 @@ def main():
     # bookstore_update()
 
     pass
+
 
 if __name__ == '__main__':
     main()
