@@ -190,9 +190,9 @@ class BookData(JsonFile):
         with open("Book.json", mode="w", encoding="utf-8") as json_file:
             json.dump(self.get_info(), json_file, indent=2)
 
-    def __del__(self):
-        with open("Book.json", mode="w", encoding="utf-8") as json_file:
-            json.dump(self.get_info(), json_file, indent=2)
+    # def __del__(self):
+    #     with open("Book.json", mode="w", encoding="utf-8") as json_file:
+    #         json.dump(self.get_info(), json_file, indent=2)
 
 
 class Bookstore(object):
@@ -283,9 +283,9 @@ class Bookstore(object):
         return book.get_info()
 
     def __del__(self):
-        book_info = BookData()
-        with open("Book.json", mode="w", encoding="utf-8") as json_file:
-            json.dump(book_info.get_info(), json_file, indent=2)
+        # book_info = BookData()
+        # with open("Book.json", mode="w", encoding="utf-8") as json_file:
+        #     json.dump(book_info.get_info(), json_file, indent=2)
         with open(self.file_name, mode="w", encoding="utf-8") as json_file:
             json.dump(self.book_list, json_file, indent=2)
 
