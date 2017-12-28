@@ -27,26 +27,53 @@ class Contents(object):
     __xpath_all_num = u"//div[@class='pg']/a[@class='last']//text()"
     __xpath_content_list = u"//td[@class='t_f']"
 
+    __xpath_next_url = u"//div[@class='pg']/a[@class='nxt']/@href"
+
+    __headers = {
+        'User-Agent':
+        'Mozilla/5.0 (Windows NT 6.1) Chrome/44.0.2403.157 Safari/537.36'
+    }
+
     def __init__(self):
 
         self.book_info = BookInfo()
+        self.url = self.book_info.get_url()
 
         self.all_chapter = self.get_chapter()
 
     def have_page(self):
-        if self.book_info.get_finish() == "False":
-            if self.book_info.get_end_url() != "":
-                pass
+        # if self.book_info.get_finish() == "False":
+        #     if self.book_info.get_end_url() != "":
+        #         pass
+        return True if self.url else False
+
+    def download(self, path):
+        try:
+            response = requests.get(self.url, headers=self.__headers)
+            return html.fromstring(response.text.encode('utf-8')).xpath(path)
+        except:
+            return None
+
+    def page_content_list(self):
+        return self.download(self.__xpath_content_list)
+
+    def get_post_num(self):
+        return self.download(self.__xpath_post_num)
 
     def page_chapters(self):
+        print(len(self.page_content_list()))
+        print(len(self.get_post_num()))
         page_list = self.page_content_list()
         for index, element in enumerate(self.get_post_num()):
             chapter_num = int(element)
-            one_content = content_list[index].xpath(u".//text()")
+            one_content = page_list[index].xpath(u".//text()")
             yield {"id": chapter_num, "content": one_content}
 
     def get_next_page(self):
-        pass
+        try:
+            self.url =  self.download(self.__xpath_next_url)[0]
+        except IndexError:
+            self.url = None
 
     def get_chapter(self):
         chapter_list = []
@@ -57,8 +84,13 @@ class Contents(object):
 
             self.get_next_page()  # !!
 
+        # !!
+        self.book_info.set_end_url(self.url)
+
+        return chapter_list
+
     def save_title(self):
-        return book_info.__str__()
+        return BookInfo().__str__()
 
     def save_json(self):
         DIR_JSON_FOLDER = os.path.join(
@@ -87,6 +119,9 @@ class Book(object):
     def get_title(self):
         return BookInfo().get_title()
 
+    def get_info(self):
+        return BookInfo().get_info()
+
     def save(self, *filetype):
         if "json" in filetype:
             self.content.save_json()
@@ -112,7 +147,7 @@ class Bookstore(object):
         return True if book.get_title() not in self.book_list_title() else False
 
     def storage(self, book):
-        book.save("josn", "txt")
+        book.save("json", "txt")
 
         self.book_list.append(book.get_info())
 

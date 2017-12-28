@@ -8,7 +8,7 @@ from wtforms.validators import Required
 from content_fix import Content
 from download_txt import SimpleToTW
 
-from test2 import Book, bookstore_new, bookstore_update
+from test7 import Book, bookstore_new, bookstore_update
 from JsonInit import JsonFile
 
 app = Flask(__name__)
@@ -63,7 +63,7 @@ class JsonFile(JsonFile):
 
     def __del__(self):
         super().__del__()
-        
+
 
 
 class Data(object):
