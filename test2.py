@@ -40,11 +40,35 @@ class Contents(object):
             "bookstore_json", JsonFile().__str__() + '.json')
         with open(DIR_JSON_FOLDER, encoding="utf-8") as json_file:
             contents = json.load(json_file)
+
+        contents = self._remove_repeat_item(contents)
+
         self.temp_list = contents
+
+    def _remove_repeat_item(self, contents):
+        print(len(contents))
+
+        key_list = []
+        new_contents = []
+        for item in contents:
+            key = item.get("id")
+            if key not in key_list:
+                key_list.append(key)
+                new_contents.append(item)
+
+        print(len(new_contents))
+
+        DIR_JSON_FOLDER = os.path.join(
+            "bookstore_json", JsonFile().__str__() + '.json')
+
+        with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
+            json.dump(new_contents, f, indent=2)
+
+        return new_contents
 
     # 下載
     def get_contents(self):
-        if not self.update_flag: # 初次下載
+        if not self.update_flag:  # 初次下載
             self.temp_list = self.get_chapter_list()
         else:
             self.temp_list = self.update()
@@ -194,31 +218,29 @@ class Bookstore(object):
         self.update()
 
 
-
-
 class Book(BookData):
 
     def __init__(self, update_flag=False):
         super().__init__()
 
-        self.book_data = BookData() # 不該出現
+        self.book_data = BookData()  # 不該出現
 
-        self.title = self.book_data.get_title() # 也只有在判斷是否在書庫有使用
+        self.title = self.book_data.get_title()  # 也只有在判斷是否在書庫有使用
 
         self.content = Contents(update_flag)
         self.content_obj = []
 
         # 不行
-        self.book_data.set_end_url(self.get_end_url()) # 要刪掉
+        self.book_data.set_end_url(self.get_end_url())  # 要刪掉
         # self.book_data.update_data()
 
     def get_title(self):
         return self.title
 
-    def get_end_url(self): # 要刪掉
+    def get_end_url(self):  # 要刪掉
         return self.content.get_end_url()
 
-    def save(self, *filetype): # 不是它的功能
+    def save(self, *filetype):  # 不是它的功能
         self.content_obj = self.content.get_contents()
 
         if "txt" in filetype:
@@ -226,17 +248,17 @@ class Book(BookData):
         if "json" in filetype:
             self.save_json()
 
-    def get_save_title(self): # 不是它的功能
+    def get_save_title(self):  # 不是它的功能
         return JsonFile().__str__()
 
-    def save_json(self): # 不是它的功能
+    def save_json(self):  # 不是它的功能
         DIR_JSON_FOLDER = os.path.join(
             "bookstore_json", self.get_save_title() + '.json')
 
         with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
             json.dump(self.content_obj, f, indent=2)
 
-    def save_txt(self): # 不是它的功能
+    def save_txt(self):  # 不是它的功能
         DIR_TXT_FOLDER = os.path.join(
             "bookstore_txt", self.get_save_title() + '.txt')
 
