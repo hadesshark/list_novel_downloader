@@ -9,10 +9,6 @@ import json
 from JsonInit import JsonFile as JsonFile
 
 
-class DownloadType(object):
-    pass
-
-
 class Contents(object):
     __xpath_post_num = u"//div[@class='plhin']//a//em//text()"
     __xpath_all_num = u"//div[@class='pg']/a[@class='last']//text()"
@@ -21,6 +17,7 @@ class Contents(object):
     def __init__(self, update_flag=False):
         self.book_data = BookData()
 
+        # 應該用 book_data finish 和 end_url 判斷
         if update_flag:
             temp_url = self.book_data.get_end_url()
         else:
@@ -189,6 +186,9 @@ class Bookstore(object):
         self.book_list = ''
         self.file_name = file_name
 
+        with open(self.file_name, encoding="utf-8") as json_file:
+            self.booklist = json.load(json_file)
+
     def get_book_list(self):
         with open(self.file_name, encoding="utf-8") as json_file:
             self.book_list = json.load(json_file)
@@ -210,12 +210,20 @@ class Bookstore(object):
         return False if book.get_title() in self.book_list_title() else True
 
     def add_book(self, book):
+        # 重點
         book.save("txt", "json")
 
-        book_obj = book.get_info()
-        self.book_list = self.get_book_list()
-        self.book_list.append(book_obj)
-        self.update()
+        self.add_to_booklist(book)
+
+    def add_to_booklist(self, book):
+        # 這邊應該建造者模式
+        book_info = book.get_info()
+        self.booklist.append(book_info)
+        self.booklist_update()
+
+    def booklist_update(self):
+        with open(self.file_name, mode="w", encoding="utf-8") as json_file:
+            json.dump(self.booklist, json_file, indent=2)
 
 
 class Book(BookData):
@@ -230,9 +238,9 @@ class Book(BookData):
         self.content = Contents(update_flag)
         self.content_obj = []
 
-        # 不行
+        # 應該在 Contents 中處理？
         self.book_data.set_end_url(self.get_end_url())  # 要刪掉
-        # self.book_data.update_data()
+        self.book_data.update_data()  # 這個好像有影響 2017/01/06
 
     def get_title(self):
         return self.title
@@ -240,40 +248,56 @@ class Book(BookData):
     def get_end_url(self):  # 要刪掉
         return self.content.get_end_url()
 
-    def save(self, *filetype):  # 不是它的功能
+    def save(self, *filetype):
+        # 重點
         self.content_obj = self.content.get_contents()
 
-        if "txt" in filetype:
-            self.save_txt()
         if "json" in filetype:
-            self.save_json()
+            JsonNovel(self.content_obj).save()
+        if "txt" in filetype:
+            TxtNovel(self.content_obj).save()
 
-    def get_save_title(self):  # 不是它的功能
+
+class JsonNovel(object):
+
+    def __init__(self, content_list=[]):
+        self.name = os.path.join(
+            "bookstore_json", self.file_str() + '.json')
+
+        self.content_list = content_list
+
+    def file_str(self):
         return JsonFile().__str__()
 
-    def save_json(self):  # 不是它的功能
-        DIR_JSON_FOLDER = os.path.join(
-            "bookstore_json", self.get_save_title() + '.json')
+    def save(self):
+        with open(self.name, mode="w", encoding="utf-8") as f:
+            json.dump(self.content_list, f, indent=2)
 
-        with open(DIR_JSON_FOLDER, mode="w", encoding="utf-8") as f:
-            json.dump(self.content_obj, f, indent=2)
 
-    def save_txt(self):  # 不是它的功能
-        DIR_TXT_FOLDER = os.path.join(
-            "bookstore_txt", self.get_save_title() + '.txt')
+class TxtNovel(object):
 
-        contents = ''
-        with open(DIR_TXT_FOLDER, mode="w", encoding="utf-8") as txt_file:
-            for item in self.content_obj:
-                contents += ''.join(item["content"])
-            txt_file.write(contents)
+    def __init__(self, content_list=[]):
+        self.name = os.path.join(
+            "bookstore_txt", self.file_str() + '.txt')
+
+        self.content_list = content_list
+
+        self.contents = ''
+        for item in self.content_list:
+            self.contents += ''.join(item["content"])
+
+    def file_str(self):
+        return JsonFile().__str__()
+
+    def save(self):
+        with open(self.name, mode="w", encoding="utf-8") as txt_file:
+            txt_file.write(self.contents)
 
 
 def bookstore_new():
     book = Book()
     bookstore = Bookstore()
     if bookstore.not_have_book(book):
-        # book.save("txt", "json")
         bookstore.add_book(book)
 
 
