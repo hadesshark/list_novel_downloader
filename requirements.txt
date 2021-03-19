@@ -15,7 +15,7 @@ Flask-WTF==0.14.2
 goose-extractor==1.0.25
 idna==2.5
 itsdangerous==0.24
-Jinja2==2.9.6
+Jinja2==2.11.3
 lxml==3.8.0
 macholib==1.8
 MarkupSafe==1.0
